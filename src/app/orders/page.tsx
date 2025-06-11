@@ -64,6 +64,7 @@ const translations = {
     selectOrderPrompt: 'Please select an order above to view its details.',
     orderItems: 'Order Summary',
     finalPriceLabel: 'Final Agreed Price',
+    exportPdf: 'Export to PDF',
   },
   no: {
     generateDetails: 'Generer Ordredetaljer',
@@ -89,6 +90,7 @@ const translations = {
     selectOrderPrompt: 'Vennligst velg en ordre ovenfor for å se detaljene.',
     orderItems: 'Ordreoversikt',
     finalPriceLabel: 'Endelig avtalt pris',
+    exportPdf: 'Eksporter til PDF',
   }
 };
 
@@ -192,10 +194,16 @@ export default function OrderDetailsPage() {
     }
   }
 
+  const handlePrint = () => {
+    if (typeof window !== 'undefined') {
+      window.print();
+    }
+  };
+
   return (
     <main className="min-h-screen bg-slate-900 text-slate-300 font-sans p-4 sm:p-6 lg:p-8">
       {/* --- CHANGE: Repositioned and restyled language toggle --- */}
-      <div className="fixed top-1/2 -translate-y-1/2 right-6 z-50 flex flex-col gap-2 bg-slate-800/80 backdrop-blur-sm rounded-lg p-1 shadow-2xl border border-slate-700/50">
+      <div className="fixed top-1/2 -translate-y-1/2 right-6 z-50 flex flex-col gap-2 bg-slate-800/80 backdrop-blur-sm rounded-lg p-1 shadow-2xl border border-slate-700/50 no-print">
         <button onClick={() => setLanguage('en')} className={`px-4 py-2 text-sm font-bold rounded-md transition-all duration-200 ${language === 'en' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}>EN</button>
         <button onClick={() => setLanguage('no')} className={`px-4 py-2 text-sm font-bold rounded-md transition-all duration-200 ${language === 'no' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}>NO</button>
       </div>
@@ -206,7 +214,7 @@ export default function OrderDetailsPage() {
           <div className="w-20 h-0.5 bg-slate-700 mx-auto rounded-full"></div>
         </div>
         
-        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 mb-6">
+        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 mb-6 no-print">
           <div className="max-w-sm mx-auto">
             <label htmlFor="order-search" className="block text-sm font-bold text-slate-400 mb-2">{T.selectAnOrder}</label>
             <div className="relative">
@@ -222,7 +230,7 @@ export default function OrderDetailsPage() {
         </div>
 
         {selectedOrder ? (
-          <div className="bg-slate-800/50 border border-slate-700 rounded-2xl overflow-hidden">
+          <div id="print-section" className="bg-slate-800/50 border border-slate-700 rounded-2xl overflow-hidden">
             <div className="bg-slate-800 p-4 border-b border-slate-700"><h2 className="text-xl font-bold text-slate-100 text-center">{T.orderDetailsFor} {selectedOrder.customerName}</h2></div>
             <div className="p-4 sm:p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -297,6 +305,11 @@ export default function OrderDetailsPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {commentKeys.map((key, index) => (<div key={key} className="bg-slate-700/50 text-slate-300 p-3 rounded-lg border border-slate-700"><div className="flex items-start"><div className="w-5 h-5 bg-slate-600 rounded-full flex items-center justify-center mr-2.5 mt-0.5 flex-shrink-0"><span className="text-xs font-bold text-slate-200">{index + 1}</span></div><p className="text-xs font-semibold leading-relaxed">{T[key]}</p></div></div>))}
                 </div>
+              </div>
+              <div className="mt-6 text-center no-print">
+                <button onClick={handlePrint} className="px-4 py-2 bg-indigo-600 text-white rounded-md font-bold hover:bg-indigo-700">
+                  {T.exportPdf}
+                </button>
               </div>
             </div>
           </div>
