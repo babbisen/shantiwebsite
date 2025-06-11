@@ -30,6 +30,17 @@ type Order = {
   }[];
   fees: OrderFee[];
   finalPrice?: number | null;
+  phone?: string;
+  email?: string;
+};
+
+const loadContactInfo = (): Record<number, { phone: string; email: string }> => {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(localStorage.getItem('orderContactInfo') || '{}');
+  } catch {
+    return {};
+  }
 };
 
 // --- HELPER FUNCTION for Currency ---
@@ -58,6 +69,7 @@ export default function CompletedOrdersPage() {
       }
       const ordersData = await ordersRes.json();
       
+      const contactData = loadContactInfo();
       const mappedOrders = ordersData.map((order: any) => ({
         ...order,
         pickUpDate: new Date(order.pickUpDate).toLocaleDateString('nb-NO'),
@@ -73,6 +85,8 @@ export default function CompletedOrdersPage() {
           total: item.total,
         })),
         fees: order.fees || [],
+        phone: contactData[order.id]?.phone || '',
+        email: contactData[order.id]?.email || '',
       }));
       setCompletedOrders(mappedOrders);
     } catch (error) {
@@ -141,7 +155,16 @@ export default function CompletedOrdersPage() {
                 <div key={order.id} className="bg-slate-800/70 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-xl overflow-hidden">
                   <div className="p-6 border-b border-slate-700">
                     <div className="flex flex-col sm:flex-row justify-between sm:items-center">
-                      <h2 className="text-2xl font-bold text-white">{order.customerName}</h2>
+                      <div>
+                        <h2 className="text-2xl font-bold text-white">{order.customerName}</h2>
+                        {(order.phone || order.email) && (
+                          <p className="text-sm text-slate-400 font-medium mt-1">
+                            {order.phone && <span>📞 {order.phone}</span>}
+                            {order.phone && order.email && <span className="mx-2">|</span>}
+                            {order.email && <span>{order.email}</span>}
+                          </p>
+                        )}
+                      </div>
                       <p className="text-sm text-slate-400 font-medium mt-1 sm:mt-0">{order.pickUpDate} → {order.deliveryDate}</p>
                     </div>
                   </div>

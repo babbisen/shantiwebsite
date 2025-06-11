@@ -26,10 +26,12 @@ const formatCurrency = (amount: number | null | undefined) => {
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
+  const [search, setSearch] = useState('');
   const [form, setForm] = useState({ name: '', totalQuantity: '', pricePerItem: '', pricePaid: '' });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const filteredItems = items.filter(item => item.name.toLowerCase().includes(search.toLowerCase()));
 
   const fetchInventory = async () => {
     try {
@@ -196,12 +198,21 @@ export default function Home() {
         </div>
 
         <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-700"><h2 className="text-xl font-bold text-white">Current Inventory</h2></div>
+          <div className="flex justify-between items-center px-6 py-4 border-b border-slate-700">
+            <h2 className="text-xl font-bold text-white">Current Inventory</h2>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="px-3 py-1 text-sm bg-slate-700 border border-slate-600 rounded-md placeholder-slate-400 text-white focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-slate-800/50"><tr className="border-b border-slate-700"><th className="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Item Name</th><th className="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">Total</th><th className="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">Rented</th><th className="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">In Stock</th><th className="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Price per Item</th><th className="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Price Paid for Single Item</th><th className="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</th></tr></thead>
               <tbody className="divide-y divide-slate-700/50">
-                {items.map((item, index) => (
+                {filteredItems.map((item, index) => (
                   <tr key={item.id} className="hover:bg-slate-700/40 transition-colors duration-200">
                     <td className="px-6 py-4 font-semibold text-slate-200">{item.name}</td>
                     <td className="px-6 py-4 text-center text-slate-300 font-medium">{item.totalQuantity}</td>

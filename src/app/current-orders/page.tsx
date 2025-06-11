@@ -18,10 +18,36 @@ type OrderFromServer = { id: number; customerName: string; deposit?: number; pic
 
 type OrderItemState = { itemId: number | null; itemName:string; quantity: number; unitPrice: number; total: number; specialPrice?: number; };
 type OrderFee = { description: string; amount: number; };
-type OrderState = { id: number; customerName: string; deposit?: number; pickUpDate: string; deliveryDate: string; items: OrderItemState[]; fees: OrderFee[]; finalPrice?: number | null; };
+type OrderState = {
+  id: number;
+  customerName: string;
+  deposit?: number;
+  pickUpDate: string;
+  deliveryDate: string;
+  items: OrderItemState[];
+  fees: OrderFee[];
+  finalPrice?: number | null;
+  phone?: string;
+  email?: string;
+};
 
 type SpecialPrice = { id: number; customerName: string; itemName: string; price: number; };
 type AvailabilityInfo = { available: number; message: string; status: 'available' | 'unavailable' | 'checking' | 'error' | 'idle'; };
+
+const loadContactInfo = (): Record<number, { phone: string; email: string }> => {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(localStorage.getItem('orderContactInfo') || '{}');
+  } catch {
+    return {};
+  }
+};
+
+const saveContactInfo = (info: Record<number, { phone: string; email: string }>) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('orderContactInfo', JSON.stringify(info));
+  }
+};
 
 // --- HELPER FUNCTION for Date Color-Coding ---
 const getPickupDateStyles = (dateStr: string): { bg: string; text: string } => {
@@ -69,6 +95,8 @@ export default function CurrentOrdersPage() {
   const [finalPrice, setFinalPrice] = useState('');
   const [pickUpDate, setPickUpDate] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [orderItems, setOrderItems] = useState<OrderItemState[]>([]);
   const [itemSearch, setItemSearch] = useState('');
   const [quantity, setQuantity] = useState('');
@@ -84,6 +112,36 @@ export default function CurrentOrdersPage() {
   const [feeDescription, setFeeDescription] = useState('');
   const [feeAmount, setFeeAmount] = useState('');
 
+  const ordersToday = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return orders.filter(o => {
+      const d = new Date(o.pickUpDate + 'T00:00:00');
+      return d.getTime() === today.getTime();
+    }).length;
+  }, [orders]);
+
+  const ordersTomorrow = useMemo(() => {
+    const tomorrow = new Date();
+    tomorrow.setHours(0, 0, 0, 0);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return orders.filter(o => {
+      const d = new Date(o.pickUpDate + 'T00:00:00');
+      return d.getTime() === tomorrow.getTime();
+    }).length;
+  }, [orders]);
+
+  const ordersThisWeek = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(today);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+    return orders.filter(o => {
+      const d = new Date(o.pickUpDate + 'T00:00:00');
+      return d >= today && d <= weekEnd;
+    }).length;
+  }, [orders]);
+
   const resetForm = useCallback(() => {
     setEditingOrderId(null);
     setCustomerName('');
@@ -91,6 +149,8 @@ export default function CurrentOrdersPage() {
     setFinalPrice('');
     setPickUpDate('');
     setDeliveryDate('');
+    setPhone('');
+    setEmail('');
     setOrderItems([]);
     setItemSearch('');
     setQuantity('');
@@ -109,6 +169,7 @@ export default function CurrentOrdersPage() {
       setInventory(inventoryData);
       setSpecialPrices(spData);
       
+      const contactData = loadContactInfo();
       const transformedOrders = ordersData.map((order) => ({
         ...order,
         pickUpDate: order.pickUpDate.slice(0, 10),
@@ -122,6 +183,8 @@ export default function CurrentOrdersPage() {
           specialPrice: item.specialPrice,
         })),
         fees: order.fees || [],
+        phone: contactData[order.id]?.phone || '',
+        email: contactData[order.id]?.email || '',
       }));
       setOrders(transformedOrders);
 
@@ -168,22 +231,38 @@ export default function CurrentOrdersPage() {
     const idToProcess = editingOrderId || 'new-order';
     setProcessingOrderId(idToProcess);
     try {
-      const payload = { customerName: customerName.trim(), deposit: deposit ? Number(deposit) : undefined, finalPrice: finalPrice ? Number(finalPrice) : undefined, pickUpDate, deliveryDate, items: orderItems.map(oi => ({...oi, itemId: oi.itemId})), fees: orderFees };
+      const payload = {
+        customerName: customerName.trim(),
+        deposit: deposit ? Number(deposit) : undefined,
+        finalPrice: finalPrice ? Number(finalPrice) : undefined,
+        pickUpDate,
+        deliveryDate,
+        items: orderItems.map(oi => ({ ...oi, itemId: oi.itemId })),
+        fees: orderFees,
+      };
       const url = editingOrderId ? `/api/orders/${editingOrderId}` : '/api/orders';
       const method = editingOrderId ? 'PUT' : 'POST';
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      if (res.ok) { 
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const data = editingOrderId ? { id: editingOrderId } : await res.json();
+        const contactData = loadContactInfo();
+        contactData[data.id] = { phone, email };
+        saveContactInfo(contactData);
         toast.success(editingOrderId ? 'Order updated successfully!' : 'Order created successfully!');
-        await reloadData(); 
-        resetForm(); 
-      } else { 
-        const err = await res.json(); 
-        toast.error(err.error || 'Failed to save order'); 
+        await reloadData();
+        resetForm();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || 'Failed to save order');
       }
     } finally {
       setProcessingOrderId(null);
     }
-  }, [customerName, pickUpDate, deliveryDate, editingOrderId, deposit, finalPrice, orderItems, orderFees, reloadData, resetForm]);
+  }, [customerName, pickUpDate, deliveryDate, editingOrderId, deposit, finalPrice, orderItems, orderFees, phone, email, reloadData, resetForm]);
 
   const handleDeleteOrder = useCallback(async (orderId: number) => { 
     setProcessingOrderId(orderId); 
@@ -217,7 +296,15 @@ export default function CurrentOrdersPage() {
   }, [reloadData]);
   
   const handleEditOrder = useCallback((order: OrderState) => {
-    setEditingOrderId(order.id); setCustomerName(order.customerName); setDeposit(order.deposit?.toString() || ''); setFinalPrice(order.finalPrice?.toString() || ''); setPickUpDate(order.pickUpDate); setDeliveryDate(order.deliveryDate); setOrderItems(order.items);
+    setEditingOrderId(order.id);
+    setCustomerName(order.customerName);
+    setDeposit(order.deposit?.toString() || '');
+    setFinalPrice(order.finalPrice?.toString() || '');
+    setPickUpDate(order.pickUpDate);
+    setDeliveryDate(order.deliveryDate);
+    setPhone(order.phone || '');
+    setEmail(order.email || '');
+    setOrderItems(order.items);
     setOrderFees(order.fees || []);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
@@ -306,18 +393,37 @@ export default function CurrentOrdersPage() {
       
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-slate-200">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center mb-12"><h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Order Management</h1><div className="w-24 h-1 bg-gradient-to-r from-indigo-400 to-purple-400 mx-auto rounded-full"></div></div>
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Order Management</h1>
+            <div className="w-24 h-1 bg-gradient-to-r from-indigo-400 to-purple-400 mx-auto rounded-full"></div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+            <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-400">Due Today</p>
+              <p className="text-2xl font-bold text-white">{ordersToday}</p>
+            </div>
+            <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-400">Due Tomorrow</p>
+              <p className="text-2xl font-bold text-white">{ordersTomorrow}</p>
+            </div>
+            <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-400">Next 7 Days</p>
+              <p className="text-2xl font-bold text-white">{ordersThisWeek}</p>
+            </div>
+          </div>
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             <div className="xl:col-span-2 space-y-8">
               <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden">
                 <div className="px-6 py-4 border-b border-slate-700"><h2 className="text-xl font-bold text-white">{editingOrderId ? 'Edit Order' : 'Create New Order'}</h2></div>
                 <div className="p-6">
                   {/* Customer and Date Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-6 mb-6">
                     <div className="lg:col-span-2 space-y-2"><label htmlFor="customerName" className={labelStyle}>Customer Name</label><input id="customerName" className={inputStyle} value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Enter name" /></div>
                     <div className="space-y-2"><label htmlFor="deposit" className={labelStyle}>Deposit (kr)</label><input id="deposit" className={inputStyle} value={deposit} onChange={e => setDeposit(e.target.value)} type="number" min={0} placeholder="0"/></div>
                     <div className="space-y-2"><label htmlFor="pickUpDate" className={labelStyle}>Pick-up Date</label><input id="pickUpDate" className={`${inputStyle} dark:[color-scheme:dark]`} type="date" value={pickUpDate} onChange={e => setPickUpDate(e.target.value)} /></div>
                     <div className="space-y-2"><label htmlFor="deliveryDate" className={labelStyle}>Delivery Date</label><input id="deliveryDate" className={`${inputStyle} dark:[color-scheme:dark]`} type="date" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} /></div>
+                    <div className="space-y-2"><label htmlFor="phone" className={labelStyle}>Phone</label><input id="phone" className={inputStyle} value={phone} onChange={e => setPhone(e.target.value)} placeholder="+47..." /></div>
+                    <div className="space-y-2"><label htmlFor="email" className={labelStyle}>Email</label><input id="email" className={inputStyle} value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" /></div>
                   </div>
                   
                   <div className="mt-4 border-t border-slate-700 pt-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -397,7 +503,14 @@ export default function CurrentOrdersPage() {
                             <div className="flex flex-col sm:flex-row justify-between sm:items-start mb-4">
                               <div>
                                 <p className="font-bold text-xl text-white">{order.customerName}</p>
-                                <div className="flex items-center gap-2 text-base font-bold mt-1">
+                                {(order.phone || order.email) && (
+                                  <p className="text-sm text-slate-400 font-medium mt-1">
+                                    {order.phone && <span>📞 {order.phone}</span>}
+                                    {order.phone && order.email && <span className="mx-2">|</span>}
+                                    {order.email && <span>{order.email}</span>}
+                                  </p>
+                                )}
+                              <div className="flex items-center gap-2 text-base font-bold mt-1">
                                   <span className={`px-2 py-0.5 rounded-md transition-colors ${pickupStyles.bg} ${pickupStyles.text}`}>{new Date(order.pickUpDate + 'T00:00:00').toLocaleDateString()}</span>
                                   <span className="text-slate-500">→</span>
                                   <span className="text-slate-400">{new Date(order.deliveryDate + 'T00:00:00').toLocaleDateString()}</span>
