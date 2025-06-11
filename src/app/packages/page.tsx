@@ -35,6 +35,11 @@ export default function PackagesPage() {
     const [packageSearch, setPackageSearch] = useState('');
     const [isPackageSearchFocused, setIsPackageSearchFocused] = useState(false);
 
+    // --- Additional Item for Order State ---
+    const [orderItemSearch, setOrderItemSearch] = useState('');
+    const [orderItemQuantity, setOrderItemQuantity] = useState('');
+    const [isOrderItemSearchFocused, setIsOrderItemSearchFocused] = useState(false);
+
 
     // --- Data Fetching ---
     const fetchData = useCallback(async () => {
@@ -148,6 +153,27 @@ export default function PackagesPage() {
             setIsProcessing(false);
         }
     };
+
+    const handleAddItemToOrder = () => {
+        if (!orderItemSearch.trim() || !orderItemQuantity) {
+            toast.error('Select an item and quantity first.');
+            return;
+        }
+        const invItem = inventory.find(i => i.name.toLowerCase() === orderItemSearch.trim().toLowerCase());
+        if (!invItem) {
+            toast.error('Item not found.');
+            return;
+        }
+        const qty = parseInt(orderItemQuantity, 10);
+        if (!qty || qty <= 0) {
+            toast.error('Quantity must be at least 1.');
+            return;
+        }
+        const unitPrice = specialPrices.find(sp => sp.customerName.toLowerCase() === customerName.toLowerCase() && sp.itemName === invItem.name)?.price ?? invItem.pricePerItem;
+        setOrderItems([...orderItems, { itemId: invItem.id, itemName: invItem.name, quantity: qty, unitPrice, total: unitPrice * qty, specialPrice: unitPrice !== invItem.pricePerItem ? unitPrice : undefined }]);
+        setOrderItemSearch('');
+        setOrderItemQuantity('');
+    };
     const handleRemoveItemFromOrder = (itemId: number | null) => {
         setOrderItems(orderItems.filter(oi => oi.itemId !== itemId));
     };
@@ -155,6 +181,10 @@ export default function PackagesPage() {
     const filteredInventory = useMemo(() =>
         inventory.filter(item => item.name.toLowerCase().includes(itemSearch.toLowerCase()))
     , [inventory, itemSearch]);
+
+    const filteredInventoryForOrder = useMemo(() =>
+        inventory.filter(item => item.name.toLowerCase().includes(orderItemSearch.toLowerCase()))
+    , [inventory, orderItemSearch]);
 
     const filteredPackages = useMemo(() =>
         packages.filter(pkg => pkg.name.toLowerCase().includes(packageSearch.toLowerCase()))
@@ -215,6 +245,36 @@ export default function PackagesPage() {
                         </div>
                         {orderItems.length > 0 && (
                             <div className="border-t border-slate-700 pt-6">
+                                <h3 className="text-lg font-semibold text-slate-200 mb-4">Add Extra Item</h3>
+                                <div className="grid grid-cols-5 gap-4 items-end mb-6">
+                                    <div className="col-span-3 relative">
+                                        <label className={labelStyle}>Item</label>
+                                        <input
+                                            type="text"
+                                            value={orderItemSearch}
+                                            onChange={(e) => setOrderItemSearch(e.target.value)}
+                                            onFocus={() => setIsOrderItemSearchFocused(true)}
+                                            onBlur={() => setTimeout(() => setIsOrderItemSearchFocused(false), 150)}
+                                            placeholder="Search for item..."
+                                            className={inputStyle}
+                                            autoComplete="off"
+                                        />
+                                        {isOrderItemSearchFocused && filteredInventoryForOrder.length > 0 && (
+                                            <ul className="absolute z-20 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg max-h-60 overflow-auto">
+                                                {filteredInventoryForOrder.map(item => (
+                                                    <li key={item.id} onMouseDown={() => setOrderItemSearch(item.name)} className="px-4 py-2 hover:bg-indigo-600 cursor-pointer">{item.name}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className={labelStyle}>Quantity</label>
+                                        <input type="number" min={1} value={orderItemQuantity} onChange={(e) => setOrderItemQuantity(e.target.value)} className={inputStyle} />
+                                    </div>
+                                    <div className="col-span-5 text-right">
+                                        <button onClick={handleAddItemToOrder} className="px-5 py-2 text-sm bg-indigo-900/70 text-indigo-300 font-bold rounded-lg hover:bg-indigo-900 transition-colors">Add Item</button>
+                                    </div>
+                                </div>
                                 <h3 className="text-lg font-semibold text-slate-200 mb-4">Order Items (Editable)</h3>
                                 <div className="space-y-2 mb-6 bg-slate-900/40 p-4 rounded-xl border border-slate-700/50">
                                     {orderItems.map((oi) => (
