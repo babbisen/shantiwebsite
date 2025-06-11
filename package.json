@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
+  "dev": "next dev",
+  "build": "next build --no-lint",
+  "start": "next start",
+  "lint": "next lint",
+  "postinstall": "prisma generate && prisma migrate deploy"
+},
   "dependencies": {
     "@prisma/client": "^6.9.0",
     "chart.js": "^4.4.9",
