@@ -1,12 +1,12 @@
 // src/app/api/orders/[id]/complete/route.ts
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 // PATCH: Mark an order as completed and clean up special prices if it's the last one for a customer
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const orderId = Number(params.id);
 
