@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 // --- TYPE DEFINITIONS ---
 interface OrderItemFromServer {
@@ -192,6 +194,63 @@ export default function OrderDetailsPage() {
     }
   }
 
+  const handleExportPDF = () => {
+    if (!selectedOrder) return;
+
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text(`${T.orderDetailsFor} ${selectedOrder.customerName}`, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+
+    doc.setFontSize(12);
+    doc.text(`${T.pickUpDate}: ${formatDisplayDate(selectedOrder.pickUpDate, language)}`, 14, 25);
+    doc.text(`${T.deliveryDate}: ${formatDisplayDate(selectedOrder.deliveryDate, language)}`, 14, 32);
+
+    const body = [
+      ...selectedOrder.items.map(item => [
+        item.itemName,
+        formatCurrency(item.unitPrice),
+        String(item.quantity),
+        formatCurrency(item.total)
+      ]),
+      ...(selectedOrder.fees || []).map(fee => [
+        fee.description,
+        formatCurrency(fee.amount),
+        '(Fee)',
+        formatCurrency(fee.amount)
+      ])
+    ];
+
+    autoTable(doc, {
+      startY: 40,
+      head: [[T.itemName, T.pricePerItem, T.quantity, T.totalPriceForItem]],
+      body,
+      theme: 'grid',
+      headStyles: { fillColor: [30, 41, 59] },
+      styles: { fontSize: 10 }
+    });
+
+    let y = (doc as any).lastAutoTable.finalY + 10;
+    doc.text(`${T.depositPayment}: ${formatCurrency(selectedOrder.deposit)}`, 14, y);
+    y += 7;
+    if (depositDeadline) {
+      doc.text(`${T.deadlineForDeposit}: ${depositDeadline}`, 14, y);
+      y += 7;
+    }
+
+    if (typeof selectedOrder.finalPrice === 'number') {
+      doc.text(`${T.finalPriceLabel}: ${formatCurrency(selectedOrder.finalPrice)}`, 14, y);
+      y += 7;
+    } else {
+      doc.text(`${T.totalPriceForOrder}: ${formatCurrency(calculatedTotal)}`, 14, y);
+      y += 7;
+    }
+
+    doc.text(`${T.includingDeposit}: ${formatCurrency((selectedOrder.finalPrice ?? calculatedTotal) + (selectedOrder.deposit || 0))}`, 14, y);
+
+    doc.save(`order_${selectedOrder.id}.pdf`);
+  };
+
   return (
     <main className="min-h-screen bg-slate-900 text-slate-300 font-sans p-4 sm:p-6 lg:p-8">
       {/* --- CHANGE: Repositioned and restyled language toggle --- */}
@@ -201,6 +260,14 @@ export default function OrderDetailsPage() {
       </div>
       
       <div className="relative max-w-3xl mx-auto">
+        {selectedOrder && (
+          <button
+            onClick={handleExportPDF}
+            className="absolute top-1/2 right-0 translate-x-full -translate-y-1/2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md shadow-lg"
+          >
+            Export to PDF
+          </button>
+        )}
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-100 mb-2 tracking-tight">{T.generateDetails}</h1>
           <div className="w-20 h-0.5 bg-slate-700 mx-auto rounded-full"></div>

@@ -3,15 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-  "dev": "next dev",
-  "build": "next build --no-lint",
-  "start": "next start",
-  "lint": "next lint",
-  "postinstall": "prisma generate && prisma migrate deploy"
-},
+    "dev": "next dev",
+    "build": "next build --no-lint",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "prisma generate && prisma migrate deploy"
+  },
   "dependencies": {
     "@prisma/client": "^6.9.0",
     "chart.js": "^4.4.9",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "next": "15.3.3",
     "papaparse": "^5.5.3",
     "react": "^19.0.0",
