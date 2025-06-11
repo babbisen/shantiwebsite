@@ -49,8 +49,8 @@ const translations = {
     orderDetailsFor: 'Order Details for',
     pickUpDate: 'Pick-up Date',
     deliveryDate: 'Delivery Date',
-    itemName: 'Item / Fee',
-    pricePerItem: 'Price per Item / Amount',
+    itemName: 'Item',
+    pricePerItem: 'Price per item',
     quantity: 'Quantity',
     totalPriceForItem: 'Total Price for Item',
     depositPayment: 'Deposit payment',
@@ -74,8 +74,8 @@ const translations = {
     orderDetailsFor: 'Ordredetaljer for',
     pickUpDate: 'Hentedato',
     deliveryDate: 'Leveringsdato',
-    itemName: 'Artikkel / Gebyr',
-    pricePerItem: 'Pris per enhet / Beløp',
+    itemName: 'Artikkel',
+    pricePerItem: 'Pris per enhet',
     quantity: 'Antall',
     totalPriceForItem: 'Totalpris for vare',
     depositPayment: 'Depositum',
@@ -194,6 +194,14 @@ export default function OrderDetailsPage() {
     }
   }
 
+  const formatPdfDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  };
+
   const handleExportPDF = () => {
     if (!selectedOrder) return;
 
@@ -203,8 +211,8 @@ export default function OrderDetailsPage() {
     doc.text(`${T.orderDetailsFor} ${selectedOrder.customerName}`, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
 
     doc.setFontSize(12);
-    doc.text(`${T.pickUpDate}: ${formatDisplayDate(selectedOrder.pickUpDate, language)}`, 14, 25);
-    doc.text(`${T.deliveryDate}: ${formatDisplayDate(selectedOrder.deliveryDate, language)}`, 14, 32);
+    doc.text(`${T.pickUpDate}: ${formatPdfDate(selectedOrder.pickUpDate)}`, 14, 25);
+    doc.text(`${T.deliveryDate}: ${formatPdfDate(selectedOrder.deliveryDate)}`, 14, 32);
 
     const body = [
       ...selectedOrder.items.map(item => [
@@ -248,6 +256,13 @@ export default function OrderDetailsPage() {
 
     doc.text(`${T.includingDeposit}: ${formatCurrency((selectedOrder.finalPrice ?? calculatedTotal) + (selectedOrder.deposit || 0))}`, 14, y);
 
+    y += 10;
+    doc.text(T.additionalComments, 14, y);
+    y += 6;
+    commentKeys.forEach((key, idx) => {
+      doc.text(`${idx + 1}. ${T[key]}`, 16, y + idx * 6);
+    });
+
     doc.save(`order_${selectedOrder.id}.pdf`);
   };
 
@@ -263,7 +278,8 @@ export default function OrderDetailsPage() {
         {selectedOrder && (
           <button
             onClick={handleExportPDF}
-            className="absolute top-1/2 right-0 translate-x-full -translate-y-1/2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md shadow-lg"
+            className="absolute top-1/2 right-0 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md shadow-lg"
+            style={{ transform: 'translate(150%, -50%)' }}
           >
             Export to PDF
           </button>
