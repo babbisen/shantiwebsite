@@ -8,6 +8,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const navItems = [
+    { href: '/dashboard', label: 'Dashboard' },
     { href: '/', label: 'Inventory' },
     { href: '/current-orders', label: 'Current Orders' },
     { href: '/packages', label: 'Packages' },

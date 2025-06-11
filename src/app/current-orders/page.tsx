@@ -397,33 +397,25 @@ export default function CurrentOrdersPage() {
             <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Order Management</h1>
             <div className="w-24 h-1 bg-gradient-to-r from-indigo-400 to-purple-400 mx-auto rounded-full"></div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-            <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-400">Due Today</p>
-              <p className="text-2xl font-bold text-white">{ordersToday}</p>
-            </div>
-            <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-400">Due Tomorrow</p>
-              <p className="text-2xl font-bold text-white">{ordersTomorrow}</p>
-            </div>
-            <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-400">Next 7 Days</p>
-              <p className="text-2xl font-bold text-white">{ordersThisWeek}</p>
-            </div>
-          </div>
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             <div className="xl:col-span-2 space-y-8">
               <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden">
                 <div className="px-6 py-4 border-b border-slate-700"><h2 className="text-xl font-bold text-white">{editingOrderId ? 'Edit Order' : 'Create New Order'}</h2></div>
                 <div className="p-6">
                   {/* Customer and Date Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-6 mb-6">
-                    <div className="lg:col-span-2 space-y-2"><label htmlFor="customerName" className={labelStyle}>Customer Name</label><input id="customerName" className={inputStyle} value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Enter name" /></div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div className="lg:col-span-2 space-y-2"><label htmlFor="customerName" className={labelStyle}>Customer Name</label><input id="customerName" autoComplete="off" className={inputStyle} value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Enter name" /></div>
                     <div className="space-y-2"><label htmlFor="deposit" className={labelStyle}>Deposit (kr)</label><input id="deposit" className={inputStyle} value={deposit} onChange={e => setDeposit(e.target.value)} type="number" min={0} placeholder="0"/></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                     <div className="space-y-2"><label htmlFor="pickUpDate" className={labelStyle}>Pick-up Date</label><input id="pickUpDate" className={`${inputStyle} dark:[color-scheme:dark]`} type="date" value={pickUpDate} onChange={e => setPickUpDate(e.target.value)} /></div>
                     <div className="space-y-2"><label htmlFor="deliveryDate" className={labelStyle}>Delivery Date</label><input id="deliveryDate" className={`${inputStyle} dark:[color-scheme:dark]`} type="date" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} /></div>
-                    <div className="space-y-2"><label htmlFor="phone" className={labelStyle}>Phone</label><input id="phone" className={inputStyle} value={phone} onChange={e => setPhone(e.target.value)} placeholder="+47..." /></div>
-                    <div className="space-y-2"><label htmlFor="email" className={labelStyle}>Email</label><input id="email" className={inputStyle} value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" /></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div className="space-y-2"><label htmlFor="phone" className={labelStyle}>Phone</label><input id="phone" autoComplete="off" className={inputStyle} value={phone} onChange={e => setPhone(e.target.value)} placeholder="+47..." /></div>
+                    <div className="lg:col-span-2 space-y-2"><label htmlFor="email" className={labelStyle}>Email</label><input id="email" autoComplete="off" className={inputStyle} value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" /></div>
                   </div>
                   
                   <div className="mt-4 border-t border-slate-700 pt-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
