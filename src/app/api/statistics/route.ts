@@ -12,8 +12,8 @@ export async function GET() {
         items: { 
           include: { 
             inventoryItem: {
-              select: { name: true, pricePaid: true } // Select pricePaid for ROI
-            } 
+              select: { name: true, pricePaid: true, totalQuantity: true }
+            }
           } 
         },
         fees: true
@@ -50,7 +50,7 @@ export async function GET() {
     });
 
     // --- KEY CHANGE: Group sales by itemName (string) instead of inventoryItemId (number) ---
-    const salesByItemMap = new Map<string, { totalSales: number, pricePaid: number }>();
+    const salesByItemMap = new Map<string, { totalSales: number, pricePaidPerItem: number, quantity: number }>();
     completedOrders.forEach(order => {
       if (order.finalPrice === null || order.finalPrice === undefined) {
         order.items.forEach(item => {
@@ -58,18 +58,26 @@ export async function GET() {
           const itemName = item.itemName || item.inventoryItem?.name;
           if (!itemName) return; // Skip if item name is not available
 
-          // Safely get pricePaid, default to 0 if item was deleted
-          const pricePaid = item.inventoryItem?.pricePaid || 0;
-          const current = salesByItemMap.get(itemName) || { totalSales: 0, pricePaid: pricePaid };
+          const pricePaidPerItem = item.inventoryItem?.pricePaid || 0;
+          const quantity = item.inventoryItem?.totalQuantity || 0;
+          const current = salesByItemMap.get(itemName);
           const itemTotal = item.specialPrice ?? item.total;
-          salesByItemMap.set(itemName, { ...current, totalSales: current.totalSales + itemTotal });
+          if (!current) {
+            salesByItemMap.set(itemName, { totalSales: itemTotal, pricePaidPerItem, quantity });
+          } else {
+            salesByItemMap.set(itemName, {
+              totalSales: current.totalSales + itemTotal,
+              pricePaidPerItem: current.pricePaidPerItem,
+              quantity: current.quantity,
+            });
+          }
         });
       }
     });
 
     const allSalesByItem = Array.from(salesByItemMap.entries()).map(([itemName, data]) => {
-        const totalInvestment = data.pricePaid;
-        const roi = totalInvestment > 0 ? ((data.totalSales - totalInvestment) / totalInvestment) * 100 : 0;
+        const totalInvestment = data.pricePaidPerItem * data.quantity;
+        const roi = totalInvestment > 0 ? (data.totalSales / totalInvestment) * 100 : 0;
         return { itemName, totalSales: data.totalSales, roi: parseFloat(roi.toFixed(2)) };
     }).filter(item => item.totalSales > 0);
     
