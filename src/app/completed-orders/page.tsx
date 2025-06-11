@@ -59,6 +59,10 @@ export default function CompletedOrdersPage() {
   const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingOrderId, setProcessingOrderId] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
+  const filteredOrders = completedOrders.filter(o =>
+    o.customerName.toLowerCase().includes(search.toLowerCase())
+  );
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -136,7 +140,14 @@ export default function CompletedOrdersPage() {
           <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">
             Completed Order Archive
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-blue-500 mx-auto rounded-full"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-blue-500 mx-auto rounded-full mb-6"></div>
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search..."
+            className="px-3 py-1 text-sm bg-slate-700 border border-slate-600 rounded-md placeholder-slate-400 text-white focus:ring-2 focus:ring-indigo-500"
+          />
         </div>
 
         {completedOrders.length === 0 ? (
@@ -146,7 +157,7 @@ export default function CompletedOrdersPage() {
           </div>
         ) : (
           <div className="space-y-8">
-            {completedOrders.map(order => {
+            {filteredOrders.map(order => {
               const itemsTotal = order.items.reduce((sum, item) => sum + item.total, 0);
               const feesTotal = (order.fees || []).reduce((sum, fee) => sum + fee.amount, 0);
               const calculatedTotal = itemsTotal + feesTotal;

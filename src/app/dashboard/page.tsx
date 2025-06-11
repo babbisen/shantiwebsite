@@ -146,22 +146,25 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
-        {upcomingPickups.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-bold text-white mt-8 mb-4">Upcoming Pick-ups</h2>
-            <div className="space-y-4">
-              {upcomingPickups.map(renderOrder)}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {upcomingPickups.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-bold text-white mt-8 mb-4">Upcoming Pick-ups</h2>
+              <div className="space-y-4">
+                {upcomingPickups.map(renderOrder)}
+              </div>
             </div>
-          </div>
-        )}
-        {upcomingDeliveries.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-bold text-white mt-8 mb-4">Upcoming Deliveries</h2>
-            <div className="space-y-4">
-              {upcomingDeliveries.map(renderOrder)}
+          )}
+          {upcomingDeliveries.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-bold text-white mt-8 mb-4">Upcoming Deliveries</h2>
+              <div className="space-y-4">
+                {upcomingDeliveries.map(renderOrder)}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
     </div>
   );
