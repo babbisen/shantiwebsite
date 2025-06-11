@@ -9,6 +9,7 @@ export default function Navbar() {
 
   const navItems = [
     { href: '/', label: 'Inventory' },
+    { href: '/dashboard', label: 'Dashboard' },
     { href: '/current-orders', label: 'Current Orders' },
     { href: '/packages', label: 'Packages' },
     { href: '/orders', label: 'Order Details' },
