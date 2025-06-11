@@ -194,16 +194,44 @@ export default function OrderDetailsPage() {
     }
   }
 
-  const handlePrint = () => {
-    if (typeof window !== 'undefined') {
-      window.print();
-    }
+  const handleDownloadPdf = async () => {
+    if (typeof window === 'undefined') return;
+
+    const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf')
+    ]);
+
+    const element = document.getElementById('print-section');
+    if (!element) return;
+
+    const canvas = await html2canvas(element);
+    const imgData = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const ratio = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
+    const imgWidth = canvas.width * ratio;
+    const imgHeight = canvas.height * ratio;
+
+    pdf.addImage(
+      imgData,
+      'PNG',
+      (pageWidth - imgWidth) / 2,
+      10,
+      imgWidth,
+      imgHeight
+    );
+
+    pdf.save(`order-${selectedOrder?.id}.pdf`);
   };
 
   return (
     <main className="min-h-screen bg-slate-900 text-slate-300 font-sans p-4 sm:p-6 lg:p-8">
       {/* --- CHANGE: Repositioned and restyled language toggle --- */}
-      <div className="fixed top-1/2 -translate-y-1/2 right-6 z-50 flex flex-col gap-2 bg-slate-800/80 backdrop-blur-sm rounded-lg p-1 shadow-2xl border border-slate-700/50 no-print">
+      <div className="fixed top-1/2 -translate-y-1/2 right-6 z-50 flex flex-col gap-2 bg-slate-800/80 backdrop-blur-sm rounded-lg p-1 shadow-2xl border border-slate-700/50">
         <button onClick={() => setLanguage('en')} className={`px-4 py-2 text-sm font-bold rounded-md transition-all duration-200 ${language === 'en' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}>EN</button>
         <button onClick={() => setLanguage('no')} className={`px-4 py-2 text-sm font-bold rounded-md transition-all duration-200 ${language === 'no' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}>NO</button>
       </div>
@@ -214,7 +242,7 @@ export default function OrderDetailsPage() {
           <div className="w-20 h-0.5 bg-slate-700 mx-auto rounded-full"></div>
         </div>
         
-        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 mb-6 no-print">
+        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 mb-6">
           <div className="max-w-sm mx-auto">
             <label htmlFor="order-search" className="block text-sm font-bold text-slate-400 mb-2">{T.selectAnOrder}</label>
             <div className="relative">
@@ -230,9 +258,20 @@ export default function OrderDetailsPage() {
         </div>
 
         {selectedOrder ? (
-          <div id="print-section" className="bg-slate-800/50 border border-slate-700 rounded-2xl overflow-hidden">
-            <div className="bg-slate-800 p-4 border-b border-slate-700"><h2 className="text-xl font-bold text-slate-100 text-center">{T.orderDetailsFor} {selectedOrder.customerName}</h2></div>
-            <div className="p-4 sm:p-6">
+          <div className="relative">
+            <button
+              onClick={handleDownloadPdf}
+              className="absolute top-1/2 -right-14 -translate-y-1/2 px-4 py-2 bg-indigo-600 text-white rounded-md font-bold hover:bg-indigo-700"
+            >
+              {T.exportPdf}
+            </button>
+            <div id="print-section" className="bg-slate-800/50 border border-slate-700 rounded-2xl overflow-hidden">
+              <div className="bg-slate-800 p-4 border-b border-slate-700">
+                <h2 className="text-xl font-bold text-slate-100 text-center">
+                  {T.orderDetailsFor} {selectedOrder.customerName}
+                </h2>
+              </div>
+              <div className="p-4 sm:p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div className="bg-slate-800 p-4 rounded-lg border border-slate-700"><div className="flex items-center"><div className="w-9 h-9 bg-slate-700 rounded-md flex items-center justify-center mr-3"><svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><div><p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{T.pickUpDate}</p><p className="text-sm font-bold text-slate-100">{formatDisplayDate(selectedOrder.pickUpDate, language)}</p></div></div></div>
                 <div className="bg-slate-800 p-4 rounded-lg border border-slate-700"><div className="flex items-center"><div className="w-9 h-9 bg-slate-700 rounded-md flex items-center justify-center mr-3"><svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div><div><p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{T.deliveryDate}</p><p className="text-sm font-bold text-slate-100">{formatDisplayDate(selectedOrder.deliveryDate, language)}</p></div></div></div>
@@ -306,10 +345,6 @@ export default function OrderDetailsPage() {
                   {commentKeys.map((key, index) => (<div key={key} className="bg-slate-700/50 text-slate-300 p-3 rounded-lg border border-slate-700"><div className="flex items-start"><div className="w-5 h-5 bg-slate-600 rounded-full flex items-center justify-center mr-2.5 mt-0.5 flex-shrink-0"><span className="text-xs font-bold text-slate-200">{index + 1}</span></div><p className="text-xs font-semibold leading-relaxed">{T[key]}</p></div></div>))}
                 </div>
               </div>
-              <div className="mt-6 text-center no-print">
-                <button onClick={handlePrint} className="px-4 py-2 bg-indigo-600 text-white rounded-md font-bold hover:bg-indigo-700">
-                  {T.exportPdf}
-                </button>
               </div>
             </div>
           </div>
