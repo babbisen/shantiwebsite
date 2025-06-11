@@ -6,10 +6,9 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // DELETE: Delete a special price and revert prices on active orders
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
-    const specialPriceId = Number(id);
+    const specialPriceId = Number(params.id);
 
     // --- TRANSACTION START ---
     await prisma.$transaction(async (tx) => {

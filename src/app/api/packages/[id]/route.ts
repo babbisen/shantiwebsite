@@ -4,9 +4,8 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const parsedId = parseInt(id, 10);
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+  const parsedId = parseInt(params.id, 10);
   if (isNaN(parsedId)) {
     return NextResponse.json({ error: 'Invalid package ID' }, { status: 400 });
   }
@@ -34,9 +33,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const parsedId = parseInt(id, 10);
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  const parsedId = parseInt(params.id, 10);
   if (isNaN(parsedId)) {
     return NextResponse.json({ error: 'Invalid package ID' }, { status: 400 });
   }

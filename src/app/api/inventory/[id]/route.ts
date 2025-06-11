@@ -6,11 +6,9 @@ import { PrismaClient, Prisma } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // PATCH: Update a core inventory item's details with robust validation
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
-    // --- FIXED: Await params before accessing properties ---
-    const resolvedParams = await params;
-    const itemId = Number(resolvedParams.id);
+    const itemId = Number(params.id);
     if (isNaN(itemId)) {
       return NextResponse.json({ error: 'Invalid item ID.' }, { status: 400 });
     }
@@ -93,11 +91,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 // DELETE: Delete an inventory item
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    // --- FIXED: Await params before accessing properties ---
-    const resolvedParams = await params;
-    const itemId = Number(resolvedParams.id);
+    const itemId = Number(params.id);
     if (isNaN(itemId)) {
       return NextResponse.json({ error: 'Invalid item ID.' }, { status: 400 });
     }

@@ -6,10 +6,9 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // PUT: Edit an existing order with a hard, date-based stock check
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
-    const orderId = Number(id);
+    const orderId = Number(params.id);
     const data = await request.json();
     const { customerName, deposit, pickUpDate, deliveryDate, items: newItems } = data;
 
@@ -80,10 +79,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 
 // DELETE: Delete an active order and clean up special prices if it's the last one for a customer
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
-    const orderId = Number(id);
+    const orderId = Number(params.id);
 
     await prisma.$transaction(async (tx) => {
       // Step 1: Find the order to get the customer's name before deleting it.
