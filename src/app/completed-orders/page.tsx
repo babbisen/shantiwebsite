@@ -184,9 +184,9 @@ export default function CompletedOrdersPage() {
                       <table className="w-full text-sm">
                         <thead className="border-b-2 border-slate-700">
                           <tr>
-                            <th className="py-2 px-2 text-left font-semibold text-slate-400 uppercase tracking-wider">Item / Fee</th>
+                            <th className="py-2 px-2 text-left font-semibold text-slate-400 uppercase tracking-wider">Item</th>
                             <th className="py-2 px-2 text-center font-semibold text-slate-400 uppercase tracking-wider">Qty</th>
-                            <th className="py-2 px-2 text-right font-semibold text-slate-400 uppercase tracking-wider">Unit Price / Amount</th>
+                            <th className="py-2 px-2 text-right font-semibold text-slate-400 uppercase tracking-wider">Price per item</th>
                             <th className="py-2 px-2 text-right font-semibold text-slate-400 uppercase tracking-wider">Total</th>
                           </tr>
                         </thead>
