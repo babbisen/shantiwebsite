@@ -6,9 +6,13 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // PATCH: Mark an order as completed and clean up special prices if it's the last one for a customer
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
-    const orderId = Number(params.id);
+    const { id } = context.params; // Get id from the context object
+    const orderId = Number(id);
 
     await prisma.$transaction(async (tx) => {
       // Step 1: Find the order to get the customer's name.
