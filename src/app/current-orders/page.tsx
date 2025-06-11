@@ -66,6 +66,8 @@ export default function CurrentOrdersPage() {
   const [editingOrderId, setEditingOrderId] = useState<number | null>(null);
   const [customerName, setCustomerName] = useState('');
   const [deposit, setDeposit] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [finalPrice, setFinalPrice] = useState('');
   const [pickUpDate, setPickUpDate] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
@@ -88,6 +90,8 @@ export default function CurrentOrdersPage() {
     setEditingOrderId(null);
     setCustomerName('');
     setDeposit('');
+    setPhone('');
+    setEmail('');
     setFinalPrice('');
     setPickUpDate('');
     setDeliveryDate('');
@@ -318,6 +322,17 @@ export default function CurrentOrdersPage() {
                     <div className="space-y-2"><label htmlFor="deposit" className={labelStyle}>Deposit (kr)</label><input id="deposit" className={inputStyle} value={deposit} onChange={e => setDeposit(e.target.value)} type="number" min={0} placeholder="0"/></div>
                     <div className="space-y-2"><label htmlFor="pickUpDate" className={labelStyle}>Pick-up Date</label><input id="pickUpDate" className={`${inputStyle} dark:[color-scheme:dark]`} type="date" value={pickUpDate} onChange={e => setPickUpDate(e.target.value)} /></div>
                     <div className="space-y-2"><label htmlFor="deliveryDate" className={labelStyle}>Delivery Date</label><input id="deliveryDate" className={`${inputStyle} dark:[color-scheme:dark]`} type="date" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} /></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className="space-y-2">
+                      <label htmlFor="phone" className={labelStyle}>Phone</label>
+                      <input id="phone" className={inputStyle} value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone number" />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="email" className={labelStyle}>Email</label>
+                      <input id="email" className={inputStyle} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
+                    </div>
                   </div>
                   
                   <div className="mt-4 border-t border-slate-700 pt-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
