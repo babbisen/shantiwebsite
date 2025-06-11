@@ -1,12 +1,12 @@
 // src/app/api/orders/[id]/route.ts
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 // PUT: Edit an existing order with a hard, date-based stock check
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const orderId = Number(params.id);
     const data = await request.json();
@@ -79,7 +79,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // DELETE: Delete an active order and clean up special prices if it's the last one for a customer
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const orderId = Number(params.id);
 

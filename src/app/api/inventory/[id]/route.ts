@@ -1,12 +1,12 @@
 // src/app/api/inventory/[id]/route.ts
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 // PATCH: Update a core inventory item's details with robust validation
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const itemId = Number(params.id);
     if (isNaN(itemId)) {
@@ -91,7 +91,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 }
 
 // DELETE: Delete an inventory item
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const itemId = Number(params.id);
     if (isNaN(itemId)) {
