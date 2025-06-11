@@ -1,9 +1,8 @@
 // src/app/api/inventory/availability/route.ts
 
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 // POST: Check availability for a specific item within a date range
 export async function POST(request: Request) {

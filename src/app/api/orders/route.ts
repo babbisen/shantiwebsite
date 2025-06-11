@@ -1,9 +1,8 @@
 // src/app/api/orders/route.ts
 
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 // GET: Get all active orders
 export async function GET() {
