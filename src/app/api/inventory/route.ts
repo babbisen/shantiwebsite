@@ -1,9 +1,8 @@
 // src/app/api/inventory/route.ts
 
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 // GET: Get all inventory items and dynamically calculate current stock
 export async function GET() {

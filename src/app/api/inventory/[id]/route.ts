@@ -1,9 +1,9 @@
 // src/app/api/inventory/[id]/route.ts
 
 import { NextResponse } from 'next/server';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 // PATCH: Update a core inventory item's details with robust validation
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {

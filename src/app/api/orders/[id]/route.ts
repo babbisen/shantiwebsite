@@ -1,9 +1,8 @@
 // src/app/api/orders/[id]/route.ts
 
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 // PUT: Edit an existing order with a hard, date-based stock check
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
