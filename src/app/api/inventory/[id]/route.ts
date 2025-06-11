@@ -1,16 +1,14 @@
 // src/app/api/inventory/[id]/route.ts
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 // PATCH: Update a core inventory item's details with robust validation
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: NextRequest, context: { params: { id: string } }) {
   try {
-    // --- FIXED: Await params before accessing properties ---
-    const resolvedParams = await params;
-    const itemId = Number(resolvedParams.id);
+    const itemId = Number(context.params.id);
     if (isNaN(itemId)) {
       return NextResponse.json({ error: 'Invalid item ID.' }, { status: 400 });
     }
@@ -86,18 +84,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
     
     console.error("Failed to update item in database:", error);
-    // Provide the actual error in the response for better debugging if it's not a known one
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
     return NextResponse.json({ error: 'Failed to update item.', details: errorMessage }, { status: 500 });
   }
 }
 
 // DELETE: Delete an inventory item
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
   try {
-    // --- FIXED: Await params before accessing properties ---
-    const resolvedParams = await params;
-    const itemId = Number(resolvedParams.id);
+    const itemId = Number(context.params.id);
     if (isNaN(itemId)) {
       return NextResponse.json({ error: 'Invalid item ID.' }, { status: 400 });
     }

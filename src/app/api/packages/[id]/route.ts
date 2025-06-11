@@ -1,11 +1,11 @@
 // src/app/api/packages/[id]/route.ts
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export async function GET(request: NextRequest, context: { params: { id: string } }) {
+  const { id } = context.params;
   const parsedId = parseInt(id, 10);
   if (isNaN(parsedId)) {
     return NextResponse.json({ error: 'Invalid package ID' }, { status: 400 });
@@ -34,8 +34,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
+  const { id } = context.params;
   const parsedId = parseInt(id, 10);
   if (isNaN(parsedId)) {
     return NextResponse.json({ error: 'Invalid package ID' }, { status: 400 });

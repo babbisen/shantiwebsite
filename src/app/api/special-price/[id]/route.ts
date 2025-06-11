@@ -1,14 +1,14 @@
 // src/app/api/special-price/[id]/route.ts
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 // DELETE: Delete a special price and revert prices on active orders
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
   try {
-    const { id } = await params;
+    const { id } = context.params;
     const specialPriceId = Number(id);
 
     // --- TRANSACTION START ---
