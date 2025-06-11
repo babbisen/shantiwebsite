@@ -25,8 +25,12 @@ export async function GET() {
     // 3. Calculate the total rented out quantity for each item
     const rentedOutMap = new Map<number, number>();
     for (const orderItem of activeOrderItems) {
-      const currentRented = rentedOutMap.get(orderItem.inventoryItemId) || 0;
-      rentedOutMap.set(orderItem.inventoryItemId, currentRented + orderItem.quantity);
+      // --- THIS IS THE FIX ---
+      // Only process items that are still linked to an inventory item
+      if (orderItem.inventoryItemId !== null) {
+        const currentRented = rentedOutMap.get(orderItem.inventoryItemId) || 0;
+        rentedOutMap.set(orderItem.inventoryItemId, currentRented + orderItem.quantity);
+      }
     }
 
     // 4. Combine the data, calculating inStock and rentedOut for the frontend
@@ -71,8 +75,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // To ensure the response has the calculated fields, we can add them here
-    // For a new item, rentedOut is 0 and inStock is totalQuantity
     const responseItem = {
       ...newItem,
       rentedOut: 0,
