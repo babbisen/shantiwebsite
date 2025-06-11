@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 
 // --- Types ---
 type OrderItemFromServer = {
@@ -46,6 +47,7 @@ const formatCurrency = (amount: number | null | undefined) => {
 export default function CompletedOrdersPage() {
   const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processingOrderId, setProcessingOrderId] = useState<number | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -83,6 +85,21 @@ export default function CompletedOrdersPage() {
 
   useEffect(() => {
     fetchData();
+  }, [fetchData]);
+
+  const handleDeleteOrder = useCallback(async (orderId: number) => {
+    setProcessingOrderId(orderId);
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
+      if (res.ok) {
+        toast.success('Order deleted.');
+        await fetchData();
+      } else {
+        toast.error('Failed to delete order');
+      }
+    } finally {
+      setProcessingOrderId(null);
+    }
   }, [fetchData]);
 
   if (loading) {
@@ -159,26 +176,35 @@ export default function CompletedOrdersPage() {
                         </tbody>
                       </table>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
+                    <div className="mt-4 pt-4 border-t border-slate-700 flex items-center">
                       {order.deposit && (
                         <div className="text-sm font-semibold text-emerald-300 bg-emerald-900/50 px-3 py-1 rounded-full">
                           Deposit Paid: {formatCurrency(order.deposit)}
                         </div>
                       )}
-                      <div className="ml-auto text-right">
-                        {typeof order.finalPrice === 'number' ? (
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm font-bold text-purple-300 bg-purple-900/50 px-3 py-1 rounded-full">FINAL PRICE</span>
-                            <span className="text-xl font-bold text-purple-300">{formatCurrency(order.finalPrice)}</span>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-end">
-                            <span className="text-xs text-slate-400 font-semibold">ORDER TOTAL</span>
-                            <span className="text-xl font-bold text-white">
-                              {formatCurrency(calculatedTotal)}
-                            </span>
-                          </div>
-                        )}
+                      <div className="ml-auto flex items-center gap-3">
+                        <div className="text-right">
+                          {typeof order.finalPrice === 'number' ? (
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm font-bold text-purple-300 bg-purple-900/50 px-3 py-1 rounded-full">FINAL PRICE</span>
+                              <span className="text-xl font-bold text-purple-300">{formatCurrency(order.finalPrice)}</span>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-end">
+                              <span className="text-xs text-slate-400 font-semibold">ORDER TOTAL</span>
+                              <span className="text-xl font-bold text-white">
+                                {formatCurrency(calculatedTotal)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleDeleteOrder(order.id)}
+                          disabled={!!processingOrderId}
+                          className="px-3 py-1 text-sm font-bold text-red-300 bg-red-900/50 hover:bg-red-900/80 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </div>
                   </div>
