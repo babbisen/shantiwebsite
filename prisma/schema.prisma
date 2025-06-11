@@ -1,0 +1,85 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model InventoryItem {
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  totalQuantity Int
+  pricePerItem  Int
+  pricePaid     Int
+
+  orderItems    OrderItem[]
+  packageItems  PackageTemplateItem[]
+}
+
+model Order {
+  id           Int         @id @default(autoincrement())
+  customerName String
+  deposit      Int?
+  pickUpDate   DateTime
+  deliveryDate DateTime
+  
+  finalPrice   Int?
+
+  items        OrderItem[]
+  fees         OrderFee[]
+  completed    Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+}
+
+model OrderItem {
+  id              Int           @id @default(autoincrement())
+  itemName        String?       // <-- CHANGED: Now optional to handle existing rows
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId         Int
+  inventoryItem   InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+  inventoryItemId Int?
+  quantity        Int
+  unitPrice       Int
+  total           Int
+  specialPrice    Int?
+}
+
+model OrderFee {
+  id          Int      @id @default(autoincrement())
+  description String
+  amount      Int
+  
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId     Int
+}
+
+model SpecialPrice {
+  id           Int      @id @default(autoincrement())
+  customerName String
+  itemName     String
+  price        Int
+
+  @@unique([customerName, itemName])
+}
+
+model PackageTemplate {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  packageItems PackageTemplateItem[]
+  createdAt    DateTime      @default(now())
+}
+
+model PackageTemplateItem {
+  id              Int           @id @default(autoincrement())
+  quantity        Int
+
+  package         PackageTemplate @relation(fields: [packageTemplateId], references: [id], onDelete: Cascade)
+  packageTemplateId Int
+
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  inventoryItemId Int
+}
