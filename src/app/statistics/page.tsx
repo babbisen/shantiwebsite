@@ -56,6 +56,11 @@ export default function StatisticsPage() {
     });
   }, []);
 
+  const sortedSalesByROI = useMemo(() => {
+    if (!stats || !stats.salesByItem) return [];
+    return [...stats.salesByItem].sort((a, b) => b.roi - a.roi);
+  }, [stats]);
+
   const sortedSalesByItem = useMemo(() => {
     if (!stats || !stats.salesByItem) return [];
     return [...stats.salesByItem].sort((a, b) => b.totalSales - a.totalSales);
@@ -180,8 +185,7 @@ export default function StatisticsPage() {
 
         <div className="bg-slate-800/90 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-xl overflow-hidden mb-8">
           <div className="px-6 py-4 border-b border-slate-700/50 bg-gradient-to-r from-slate-700/80 to-stone-700/80">
-            {/* --- CHANGE 1: Update the heading for clarity --- */}
-            <h2 className="text-xl font-semibold text-slate-200">Top 10 Items by Sales & ROI</h2>
+            <h2 className="text-xl font-semibold text-slate-200">Top 10 Items by ROI</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -194,7 +198,7 @@ export default function StatisticsPage() {
               </thead>
               <tbody className="divide-y divide-slate-700/50">
                 {/* --- CHANGE 2: Add .slice(0, 10) to limit the list --- */}
-                {sortedSalesByItem.slice(0, 10).map((item, index) => (
+                {sortedSalesByROI.slice(0, 10).map((item, index) => (
                   <tr key={index} className="hover:bg-slate-700/30 transition-all duration-200">
                     <td className="px-6 py-4 font-semibold text-slate-200">{item.itemName}</td>
                     <td className="px-6 py-4 text-right text-slate-300 font-medium">{formatCurrency(item.totalSales)}</td>
