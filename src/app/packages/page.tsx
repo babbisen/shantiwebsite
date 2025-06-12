@@ -8,7 +8,23 @@ type PackageItem = { inventoryItemId: number; quantity: number; };
 type PackageTemplate = { id: number; name: string; };
 type DetailedPackageTemplate = PackageTemplate & { packageItems: { inventoryItem: InventoryItem; quantity: number; }[] };
 type OrderItem = { itemId: number | null; itemName: string; quantity: number; unitPrice: number; total: number; specialPrice?: number; };
+type OrderFee = { description: string; amount: number; };
 type SpecialPrice = { customerName: string; itemName: string; price: number; };
+
+const loadContactInfo = (): Record<number, { phone: string; email: string }> => {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(localStorage.getItem('orderContactInfo') || '{}');
+  } catch {
+    return {};
+  }
+};
+
+const saveContactInfo = (info: Record<number, { phone: string; email: string }>) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('orderContactInfo', JSON.stringify(info));
+  }
+};
 
 // --- Main Component ---
 export default function PackagesPage() {
@@ -25,6 +41,13 @@ export default function PackagesPage() {
     const [deliveryDate, setDeliveryDate] = useState('');
     const [selectedPackageId, setSelectedPackageId] = useState<string>('');
     const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+    const [orderFees, setOrderFees] = useState<OrderFee[]>([]);
+    const [feeDescription, setFeeDescription] = useState('');
+    const [feeAmount, setFeeAmount] = useState('');
+
+    const [deposit, setDeposit] = useState('');
+    const [phone, setPhone] = useState('');
+    const [email, setEmail] = useState('');
     
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -140,11 +163,33 @@ export default function PackagesPage() {
         }
         setIsProcessing(true);
         try {
-            const payload = { customerName, pickUpDate, deliveryDate, items: orderItems };
+            const payload = {
+                customerName,
+                pickUpDate,
+                deliveryDate,
+                items: orderItems,
+                deposit: deposit ? Number(deposit) : undefined,
+                fees: orderFees,
+            };
             const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             if (res.ok) {
+                const data = await res.json();
+                const contactData = loadContactInfo();
+                contactData[data.id] = { phone, email };
+                saveContactInfo(contactData);
                 toast.success('Order created successfully!');
-                setCustomerName(''); setPickUpDate(''); setDeliveryDate(''); setSelectedPackageId(''); setOrderItems([]); setPackageSearch('');
+                setCustomerName('');
+                setDeposit('');
+                setPickUpDate('');
+                setDeliveryDate('');
+                setPhone('');
+                setEmail('');
+                setSelectedPackageId('');
+                setOrderItems([]);
+                setOrderFees([]);
+                setFeeDescription('');
+                setFeeAmount('');
+                setPackageSearch('');
             } else {
                 const err = await res.json();
                 toast.error(`Order creation failed: ${err.error}`);
@@ -178,6 +223,17 @@ export default function PackagesPage() {
         setOrderItems(orderItems.filter(oi => oi.itemId !== itemId));
     };
 
+    const handleAddFee = () => {
+        if (!feeDescription.trim() || !feeAmount) return;
+        setOrderFees([...orderFees, { description: feeDescription.trim(), amount: Number(feeAmount) }]);
+        setFeeDescription('');
+        setFeeAmount('');
+    };
+
+    const handleRemoveFee = (idx: number) => {
+        setOrderFees(orderFees.filter((_, i) => i !== idx));
+    };
+
     const filteredInventory = useMemo(() =>
         inventory.filter(item => item.name.toLowerCase().includes(itemSearch.toLowerCase()))
     , [inventory, itemSearch]);
@@ -189,6 +245,12 @@ export default function PackagesPage() {
     const filteredPackages = useMemo(() =>
         packages.filter(pkg => pkg.name.toLowerCase().includes(packageSearch.toLowerCase()))
     , [packages, packageSearch]);
+
+    const calculatedTotal = useMemo(() => {
+        const itemsTotal = orderItems.reduce((acc, item) => acc + item.total, 0);
+        const feesTotal = orderFees.reduce((acc, fee) => acc + fee.amount, 0);
+        return itemsTotal + feesTotal;
+    }, [orderItems, orderFees]);
 
     // --- UI Helpers & Styles ---
     const inputStyle = "w-full px-4 py-3 bg-slate-700/50 border-2 border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition font-semibold";
@@ -221,9 +283,14 @@ export default function PackagesPage() {
                                 <div><label htmlFor="pickup" className={labelStyle}>Pick-up Date</label><input id="pickup" type="date" value={pickUpDate} onChange={(e) => setPickUpDate(e.target.value)} className={`${inputStyle} dark:[color-scheme:dark]`} /></div>
                                 <div><label htmlFor="delivery" className={labelStyle}>Delivery Date</label><input id="delivery" type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} className={`${inputStyle} dark:[color-scheme:dark]`} /></div>
                             </div>
+                            <div><label htmlFor="deposit" className={labelStyle}>Deposit (kr)</label><input id="deposit" type="number" min={0} value={deposit} onChange={(e) => setDeposit(e.target.value)} className={inputStyle} /></div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div><label htmlFor="phone" className={labelStyle}>Phone</label><input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputStyle} /></div>
+                                <div><label htmlFor="email" className={labelStyle}>Email</label><input id="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputStyle} /></div>
+                            </div>
                             <div className="relative">
                                 <label htmlFor="package-search" className={labelStyle}>Select Package</label>
-                                <input 
+                                <input
                                     id="package-search"
                                     type="text"
                                     value={packageSearch}
@@ -275,6 +342,20 @@ export default function PackagesPage() {
                                         <button onClick={handleAddItemToOrder} className="px-5 py-2 text-sm bg-indigo-900/70 text-indigo-300 font-bold rounded-lg hover:bg-indigo-900 transition-colors">Add Item</button>
                                     </div>
                                 </div>
+                                <h3 className="text-lg font-semibold text-slate-200 mb-4">Add Service or Fee</h3>
+                                <div className="grid grid-cols-5 gap-4 items-end mb-6">
+                                    <div className="col-span-3">
+                                        <label className={labelStyle}>Description</label>
+                                        <input type="text" value={feeDescription} onChange={(e) => setFeeDescription(e.target.value)} className={inputStyle} placeholder="e.g., Washing Fee" />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className={labelStyle}>Amount (kr)</label>
+                                        <input type="number" min={0} value={feeAmount} onChange={(e) => setFeeAmount(e.target.value)} className={inputStyle} />
+                                    </div>
+                                    <div className="col-span-5 text-right">
+                                        <button onClick={handleAddFee} className="px-5 py-2 text-sm bg-indigo-900/70 text-indigo-300 font-bold rounded-lg hover:bg-indigo-900 transition-colors" disabled={!feeDescription || !feeAmount}>Add Fee</button>
+                                    </div>
+                                </div>
                                 <h3 className="text-lg font-semibold text-slate-200 mb-4">Order Items (Editable)</h3>
                                 <div className="space-y-2 mb-6 bg-slate-900/40 p-4 rounded-xl border border-slate-700/50">
                                     {orderItems.map((oi) => (
@@ -283,8 +364,14 @@ export default function PackagesPage() {
                                             <div className="flex items-center gap-4"><span className="font-bold text-slate-300">{formatCurrency(oi.total)}</span><button onClick={() => handleRemoveItemFromOrder(oi.itemId)} className="text-red-400 hover:text-red-300 font-bold text-xl">×</button></div>
                                         </div>
                                     ))}
+                                    {orderFees.map((fee, idx) => (
+                                        <div key={`fee-${idx}`} className="flex items-center justify-between p-3 bg-cyan-900/40 rounded-lg border border-cyan-800/50">
+                                            <div><span className="font-bold text-slate-200">{fee.description}</span><span className="ml-2 text-xs font-bold text-cyan-300 bg-cyan-900/50 px-2 py-1 rounded-full">FEE</span></div>
+                                            <div className="flex items-center gap-4"><span className="font-bold text-slate-300">{formatCurrency(fee.amount)}</span><button onClick={() => handleRemoveFee(idx)} className="text-red-400 hover:text-red-300 font-bold text-xl">×</button></div>
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="text-right text-xl font-bold text-white border-t border-slate-700 pt-3 mt-3">Total: {formatCurrency(orderItems.reduce((acc, item) => acc + item.total, 0))}</div>
+                                <div className="text-right text-xl font-bold text-white border-t border-slate-700 pt-3 mt-3">Total: {formatCurrency(calculatedTotal)}</div>
                                 <button onClick={handleCreateOrderFromPackage} className={`${primaryButton} mt-6 w-full`} disabled={isProcessing}>
                                     {isProcessing ? <div className="w-5 h-5 mx-auto border-2 border-white/50 border-t-white rounded-full animate-spin"></div> : 'Create Order'}
                                 </button>
