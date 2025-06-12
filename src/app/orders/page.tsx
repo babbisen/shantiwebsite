@@ -258,8 +258,14 @@ export default function OrderDetailsPage() {
     y += 10;
     doc.text(T.additionalComments, 14, y);
     y += 6;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const maxTextWidth = pageWidth - 32; // account for 16mm margins
+    let commentY = y;
     commentKeys.forEach((key, idx) => {
-      doc.text(`${idx + 1}. ${T[key]}`, 16, y + idx * 6);
+      const text = `${idx + 1}. ${T[key]}`;
+      const lines = doc.splitTextToSize(text, maxTextWidth);
+      doc.text(lines, 16, commentY);
+      commentY += lines.length * 6; // approximate line height
     });
 
     const fileName =
