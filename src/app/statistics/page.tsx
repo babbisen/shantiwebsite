@@ -243,9 +243,9 @@ export default function StatisticsPage() {
               <Line data={monthlySalesData} options={chartOptions} />
             </div>
           </div>
-          <div className="lg:col-span-3 bg-slate-800/90 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-xl p-6">
+          <div className="lg:col-span-3 bg-slate-800/90 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-xl p-6 overflow-visible">
             <h2 className="text-xl font-semibold text-slate-200 text-center mb-4">Sales Distribution</h2>
-            <div className="h-80 flex justify-center items-center">
+            <div className="h-80 flex justify-center items-center overflow-visible">
               <Pie data={pieChartData} options={{...chartOptions, plugins: { legend: { position: 'right' as const, display: true, labels: { color: '#e2e8f0' } }}}}/>
             </div>
           </div>
