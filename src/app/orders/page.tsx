@@ -110,14 +110,13 @@ const formatCurrency = (amount: number | null | undefined) => {
   return `${formattedAmount} kr`;
 };
 
-const formatDisplayDate = (dateString: string, locale: 'en' | 'no') => {
+const formatDisplayDate = (dateString: string) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  return new Intl.DateTimeFormat(locale === 'no' ? 'nb-NO' : 'en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(date);
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
 };
 
 export default function OrderDetailsPage() {
@@ -313,8 +312,8 @@ export default function OrderDetailsPage() {
             <div className="bg-slate-800 p-4 border-b border-slate-700"><h2 className="text-xl font-bold text-slate-100 text-center">{T.orderDetailsFor} {selectedOrder.customerName}</h2></div>
             <div className="p-4 sm:p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div className="bg-slate-800 p-4 rounded-lg border border-slate-700"><div className="flex items-center"><div className="w-9 h-9 bg-slate-700 rounded-md flex items-center justify-center mr-3"><svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><div><p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{T.pickUpDate}</p><p className="text-sm font-bold text-slate-100">{formatDisplayDate(selectedOrder.pickUpDate, language)}</p></div></div></div>
-                <div className="bg-slate-800 p-4 rounded-lg border border-slate-700"><div className="flex items-center"><div className="w-9 h-9 bg-slate-700 rounded-md flex items-center justify-center mr-3"><svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div><div><p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{T.deliveryDate}</p><p className="text-sm font-bold text-slate-100">{formatDisplayDate(selectedOrder.deliveryDate, language)}</p></div></div></div>
+              <div className="bg-slate-800 p-4 rounded-lg border border-slate-700"><div className="flex items-center"><div className="w-9 h-9 bg-slate-700 rounded-md flex items-center justify-center mr-3"><svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><div><p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{T.pickUpDate}</p><p className="text-sm font-bold text-slate-100">{formatDisplayDate(selectedOrder.pickUpDate)}</p></div></div></div>
+              <div className="bg-slate-800 p-4 rounded-lg border border-slate-700"><div className="flex items-center"><div className="w-9 h-9 bg-slate-700 rounded-md flex items-center justify-center mr-3"><svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div><div><p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{T.deliveryDate}</p><p className="text-sm font-bold text-slate-100">{formatDisplayDate(selectedOrder.deliveryDate)}</p></div></div></div>
               </div>
               
               <div className="mb-6">

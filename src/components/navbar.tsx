@@ -21,11 +21,11 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-slate-800/90 backdrop-blur-md shadow-md sticky top-0 z-40 border-b border-slate-700/50">
+    <nav className="bg-gradient-to-r from-indigo-800 via-purple-800 to-fuchsia-800/90 backdrop-blur-md shadow-md sticky top-0 z-40 border-b border-slate-700/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="relative flex items-center justify-center h-16">
           <button
-            className="md:hidden p-2 text-slate-300 hover:text-white"
+            className="absolute left-0 md:hidden p-2 text-slate-300 hover:text-white"
             aria-label="Toggle navigation"
             onClick={() => setOpen(!open)}
           >
