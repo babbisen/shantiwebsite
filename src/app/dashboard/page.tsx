@@ -117,7 +117,7 @@ export default function DashboardPage() {
       orders.filter(o => {
         const start = new Date(o.pickUpDate + 'T00:00:00');
         const end = new Date(o.deliveryDate + 'T00:00:00');
-        return start <= today && end >= today;
+        return start < today && end >= today;
       }),
     [orders, today]
   );
@@ -127,7 +127,7 @@ export default function DashboardPage() {
       orders
         .filter(o => {
           const start = new Date(o.pickUpDate + 'T00:00:00');
-          return start > today && start <= inFive;
+          return start >= today && start <= inFive;
         })
         .sort((a, b) =>
           new Date(a.pickUpDate).getTime() - new Date(b.pickUpDate).getTime()
@@ -171,7 +171,11 @@ export default function DashboardPage() {
     }
   };
 
-  const renderOrder = (order: Order, colorize: boolean = true) => {
+  const renderOrder = (
+    order: Order,
+    colorize: boolean = true,
+    highlightToday: boolean = false
+  ) => {
     const pickupStyles = getPickupDateStyles(order.pickUpDate);
     const itemsTotal = order.items.reduce((a, b) => a + b.total, 0);
     const feesTotal = order.fees.reduce((a, b) => a + b.amount, 0);
@@ -184,6 +188,9 @@ export default function DashboardPage() {
             <h3 className="text-lg font-bold text-white">{order.customerName}</h3>
             <div className="flex items-center gap-2 text-sm font-bold mt-1">
               <span className={`px-2 py-0.5 rounded-md ${colorize ? pickupStyles.bg : ''} ${colorize ? pickupStyles.text : ''}`}>{formatDate(order.pickUpDate)}</span>
+              {highlightToday && (
+                <span className="px-2 py-0.5 bg-red-600 text-white rounded-md text-xs">TODAY</span>
+              )}
               <span className="text-slate-500">→</span>
               <span className="text-slate-400">{formatDate(order.deliveryDate)}</span>
             </div>
@@ -263,7 +270,14 @@ export default function DashboardPage() {
               )}
               <h2 className="text-2xl font-bold text-white mt-8 mb-4">Upcoming Pick-ups</h2>
               <div className="space-y-4">
-                {upcomingPickups.map(o => renderOrder(o))}
+                {upcomingPickups.map(o =>
+                  renderOrder(
+                    o,
+                    true,
+                    new Date(o.pickUpDate + 'T00:00:00').getTime() ===
+                      today.getTime()
+                  )
+                )}
               </div>
             </div>
           )}
