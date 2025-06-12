@@ -104,6 +104,15 @@ export default function PackagesPage() {
             toast.error('Package name and at least one item are required.');
             return;
         }
+
+        for (const pi of packageItems) {
+            const inv = inventory.find(it => it.id === pi.inventoryItem.id);
+            if (inv && pi.quantity > inv.totalQuantity) {
+                toast.error(`Not enough '${inv.name}' in inventory to create this package.`);
+                return;
+            }
+        }
+
         setIsProcessing(true);
         try {
             const payload = {
@@ -278,15 +287,48 @@ export default function PackagesPage() {
                     <div className={`space-y-6 ${cardStyle}`}>
                         <h2 className="text-2xl font-bold text-white">Create Order from Package</h2>
                         <div className="space-y-4">
-                            <div><label htmlFor="customer" className={labelStyle}>Customer Name</label><input id="customer" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className={inputStyle} /></div>
+                            <div>
+                                <label htmlFor="customer" className={labelStyle}>Customer Name</label>
+                                <input
+                                    id="customer"
+                                    value={customerName}
+                                    onChange={(e) => setCustomerName(e.target.value)}
+                                    className={inputStyle}
+                                    autoComplete="new-password"
+                                    autoCorrect="off"
+                                    spellCheck={false}
+                                />
+                            </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div><label htmlFor="pickup" className={labelStyle}>Pick-up Date</label><input id="pickup" type="date" value={pickUpDate} onChange={(e) => setPickUpDate(e.target.value)} className={`${inputStyle} dark:[color-scheme:dark]`} /></div>
                                 <div><label htmlFor="delivery" className={labelStyle}>Delivery Date</label><input id="delivery" type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} className={`${inputStyle} dark:[color-scheme:dark]`} /></div>
                             </div>
                             <div><label htmlFor="deposit" className={labelStyle}>Deposit (kr)</label><input id="deposit" type="number" min={0} value={deposit} onChange={(e) => setDeposit(e.target.value)} className={inputStyle} /></div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label htmlFor="phone" className={labelStyle}>Phone</label><input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputStyle} /></div>
-                                <div><label htmlFor="email" className={labelStyle}>Email</label><input id="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputStyle} /></div>
+                                <div>
+                                    <label htmlFor="phone" className={labelStyle}>Phone</label>
+                                    <input
+                                        id="phone"
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                        className={inputStyle}
+                                        autoComplete="new-password"
+                                        autoCorrect="off"
+                                        spellCheck={false}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="email" className={labelStyle}>Email</label>
+                                    <input
+                                        id="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className={inputStyle}
+                                        autoComplete="new-password"
+                                        autoCorrect="off"
+                                        spellCheck={false}
+                                    />
+                                </div>
                             </div>
                             <div className="relative">
                                 <label htmlFor="package-search" className={labelStyle}>Select Package</label>
