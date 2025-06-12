@@ -285,7 +285,14 @@ export default function DashboardPage() {
             <div>
               <h2 className="text-2xl font-bold text-white mt-8 mb-4">Upcoming Deliveries</h2>
               <div className="space-y-4">
-                {upcomingDeliveries.map(o => renderOrder(o, false))}
+                {upcomingDeliveries.map(o =>
+                  renderOrder(
+                    o,
+                    false,
+                    new Date(o.deliveryDate + 'T00:00:00').getTime() ===
+                      today.getTime()
+                  )
+                )}
               </div>
             </div>
           )}
