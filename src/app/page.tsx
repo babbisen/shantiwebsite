@@ -210,7 +210,17 @@ export default function Home() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-800/50"><tr className="border-b border-slate-700"><th className="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Item Name</th><th className="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">Total</th><th className="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">Rented</th><th className="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">In Stock</th><th className="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Price per Item</th><th className="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Price Paid for Single Item</th><th className="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</th></tr></thead>
+              <thead className="bg-slate-800/50">
+                <tr className="border-b border-slate-700">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Item Name</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Quantity</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">Rented Now</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">In Stock Now</th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Price per Item</th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Price Paid for Single Item</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
               <tbody className="divide-y divide-slate-700/50">
                 {filteredItems.map((item, index) => (
                   <tr key={item.id} className="hover:bg-slate-700/40 transition-colors duration-200">
