@@ -407,7 +407,7 @@ export default function CurrentOrdersPage() {
                       <h3 className="text-lg font-bold text-slate-300 mb-2">Add Inventory Item</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
                         <div className="sm:col-span-3 space-y-2"><label htmlFor="itemSearch" className={labelStyle}>Item</label><input id="itemSearch" className={inputStyle} value={itemSearch} onChange={e => setItemSearch(e.target.value)} placeholder="Type or select item" list="inventory-items" /><datalist id="inventory-items">{filteredItems.map(item => (<option key={item.id} value={item.name} />))}</datalist></div>
-                        <div className="sm:col-span-2 space-y-2"><label htmlFor="quantity" className={labelStyle}>Quantity</label><input id="quantity" className={inputStyle} type="number" min={1} value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="1"/></div>
+                        <div className="sm:col-span-2 space-y-2"><label htmlFor="quantity" className={labelStyle}>Quantity</label><input id="quantity" className={inputStyle} type="number" min={1} value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="0"/></div>
                       </div>
                       <StockStatus info={availabilityInfo} />
                       <div className="text-right mt-2"><button className="px-5 py-2 text-sm bg-indigo-900/70 text-indigo-300 font-bold rounded-lg hover:bg-indigo-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onClick={handleAddItem} disabled={availabilityInfo.status !== 'available' || !quantity}>Add Item to Order</button></div>
