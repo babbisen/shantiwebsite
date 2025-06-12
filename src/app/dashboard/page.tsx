@@ -1,12 +1,20 @@
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
+import { CurrencyDollarIcon, TruckIcon, CalendarDaysIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { formatDate } from '@/lib/date';
 import { getPickupDateStyles } from '@/lib/pickupColors';
 
 interface OrderItemFromServer {
   itemName: string | null;
   quantity: number;
+  unitPrice: number;
+  total: number;
   inventoryItem?: { name: string } | null;
+}
+
+interface OrderFee {
+  description: string;
+  amount: number;
 }
 
 interface OrderFromServer {
@@ -14,7 +22,9 @@ interface OrderFromServer {
   customerName: string;
   pickUpDate: string;
   deliveryDate: string;
+  finalPrice?: number | null;
   items: OrderItemFromServer[];
+  fees?: OrderFee[];
 }
 
 interface Order {
@@ -22,8 +32,28 @@ interface Order {
   customerName: string;
   pickUpDate: string;
   deliveryDate: string;
-  items: { itemName: string; quantity: number }[];
+  finalPrice?: number | null;
+  items: { itemName: string; quantity: number; unitPrice: number; total: number }[];
+  fees: OrderFee[];
+  phone?: string;
+  email?: string;
 }
+
+const loadContactInfo = (): Record<number, { phone: string; email: string }> => {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(localStorage.getItem('orderContactInfo') || '{}');
+  } catch {
+    return {};
+  }
+};
+
+const formatCurrency = (amount: number | null | undefined) => {
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    return '0,00 kr';
+  }
+  return `${new Intl.NumberFormat('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)} kr`;
+};
 
 export default function DashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -34,15 +64,22 @@ export default function DashboardPage() {
       try {
         const res = await fetch('/api/orders');
         const data: OrderFromServer[] = await res.json();
+        const contactData = loadContactInfo();
         const mapped: Order[] = data.map(o => ({
           id: o.id,
           customerName: o.customerName,
           pickUpDate: o.pickUpDate.slice(0, 10),
           deliveryDate: o.deliveryDate.slice(0, 10),
+          finalPrice: o.finalPrice ?? undefined,
           items: o.items.map(i => ({
             itemName: i.itemName || i.inventoryItem?.name || 'Deleted Item',
             quantity: i.quantity,
+            unitPrice: i.unitPrice,
+            total: i.total,
           })),
+          fees: o.fees || [],
+          phone: contactData[o.id]?.phone || '',
+          email: contactData[o.id]?.email || '',
         }));
         setOrders(mapped);
       } finally {
@@ -93,8 +130,21 @@ export default function DashboardPage() {
     [orders, today, inFive]
   );
 
+  const upcomingRevenue = useMemo(() => {
+    return upcomingPickups.reduce((sum, order) => {
+      if (typeof order.finalPrice === 'number') return sum + order.finalPrice;
+      const itemsTotal = order.items.reduce((a, b) => a + b.total, 0);
+      const feesTotal = order.fees.reduce((a, b) => a + b.amount, 0);
+      return sum + itemsTotal + feesTotal;
+    }, 0);
+  }, [upcomingPickups]);
+
   const renderOrder = (order: Order) => {
     const pickupStyles = getPickupDateStyles(order.pickUpDate);
+    const itemsTotal = order.items.reduce((a, b) => a + b.total, 0);
+    const feesTotal = order.fees.reduce((a, b) => a + b.amount, 0);
+    const calculatedTotal =
+      typeof order.finalPrice === 'number' ? order.finalPrice : itemsTotal + feesTotal;
     return (
       <div key={order.id} className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center">
@@ -105,7 +155,15 @@ export default function DashboardPage() {
               <span className="text-slate-500">→</span>
               <span className="text-slate-400">{formatDate(order.deliveryDate)}</span>
             </div>
+            {(order.phone || order.email) && (
+              <p className="text-xs text-slate-400 font-medium mt-1">
+                {order.phone && <span>📞 {order.phone}</span>}
+                {order.phone && order.email && <span className="mx-1">|</span>}
+                {order.email && <span>{order.email}</span>}
+              </p>
+            )}
           </div>
+          <p className="text-sm font-bold text-white mt-2 sm:mt-0">{formatCurrency(calculatedTotal)}</p>
         </div>
         <ul className="mt-2 text-sm text-slate-300 list-disc list-inside space-y-1">
           {order.items.map((it, idx) => (
@@ -134,18 +192,18 @@ export default function DashboardPage() {
           <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Dashboard</h1>
           <div className="w-24 h-1 bg-gradient-to-r from-indigo-400 to-purple-400 mx-auto rounded-full"></div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-400">Currently Out</p>
-            <p className="text-2xl font-bold text-white">{currentlyOut.length}</p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 shadow-lg">
+            <div className="flex items-center"><div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg"><TruckIcon className="w-6 h-6 text-white" /></div><div className="ml-4"><p className="text-sm font-medium text-slate-400">Currently Out</p><p className="text-2xl font-bold text-white">{currentlyOut.length}</p></div></div>
           </div>
-          <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-400">Pick-ups Next 5 Days</p>
-            <p className="text-2xl font-bold text-white">{upcomingPickups.length}</p>
+          <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 shadow-lg">
+            <div className="flex items-center"><div className="p-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 shadow-lg"><CalendarDaysIcon className="w-6 h-6 text-white" /></div><div className="ml-4"><p className="text-sm font-medium text-slate-400">Pick-ups Next 5 Days</p><p className="text-2xl font-bold text-white">{upcomingPickups.length}</p></div></div>
           </div>
-          <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-400">Deliveries Next 5 Days</p>
-            <p className="text-2xl font-bold text-white">{upcomingDeliveries.length}</p>
+          <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 shadow-lg">
+            <div className="flex items-center"><div className="p-3 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-600 shadow-lg"><ArrowDownTrayIcon className="w-6 h-6 text-white" /></div><div className="ml-4"><p className="text-sm font-medium text-slate-400">Deliveries Next 5 Days</p><p className="text-2xl font-bold text-white">{upcomingDeliveries.length}</p></div></div>
+          </div>
+          <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 shadow-lg">
+            <div className="flex items-center"><div className="p-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 shadow-lg"><CurrencyDollarIcon className="w-6 h-6 text-white" /></div><div className="ml-4"><p className="text-sm font-medium text-slate-400">Expected Revenue</p><p className="text-2xl font-bold text-white">{formatCurrency(upcomingRevenue)}</p></div></div>
           </div>
         </div>
         {currentlyOut.length > 0 && (
