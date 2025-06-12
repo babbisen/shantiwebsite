@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
+import { formatDate } from '@/lib/date';
 
 // --- Types ---
 type OrderItemFromServer = {
@@ -76,8 +77,8 @@ export default function CompletedOrdersPage() {
       const contactData = loadContactInfo();
       const mappedOrders = ordersData.map((order: any) => ({
         ...order,
-        pickUpDate: new Date(order.pickUpDate).toLocaleDateString('nb-NO'),
-        deliveryDate: new Date(order.deliveryDate).toLocaleDateString('nb-NO'),
+        pickUpDate: formatDate(order.pickUpDate),
+        deliveryDate: formatDate(order.deliveryDate),
         items: order.items.map((item: OrderItemFromServer) => ({
           // --- THIS IS THE KEY CHANGE ---
           // 1. Use the snapped `itemName` if it exists.

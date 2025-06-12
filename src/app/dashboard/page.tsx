@@ -1,5 +1,7 @@
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
+import { formatDate } from '@/lib/date';
+import { getPickupDateStyles } from '@/lib/pickupColors';
 
 interface OrderItemFromServer {
   itemName: string | null;
@@ -91,21 +93,28 @@ export default function DashboardPage() {
     [orders, today, inFive]
   );
 
-  const renderOrder = (order: Order) => (
-    <div key={order.id} className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center">
-        <div>
-          <h3 className="text-lg font-bold text-white">{order.customerName}</h3>
-          <p className="text-sm text-slate-400 mt-1">{order.pickUpDate} → {order.deliveryDate}</p>
+  const renderOrder = (order: Order) => {
+    const pickupStyles = getPickupDateStyles(order.pickUpDate);
+    return (
+      <div key={order.id} className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center">
+          <div>
+            <h3 className="text-lg font-bold text-white">{order.customerName}</h3>
+            <div className="flex items-center gap-2 text-sm font-bold mt-1">
+              <span className={`px-2 py-0.5 rounded-md ${pickupStyles.bg} ${pickupStyles.text}`}>{formatDate(order.pickUpDate)}</span>
+              <span className="text-slate-500">→</span>
+              <span className="text-slate-400">{formatDate(order.deliveryDate)}</span>
+            </div>
+          </div>
         </div>
+        <ul className="mt-2 text-sm text-slate-300 list-disc list-inside space-y-1">
+          {order.items.map((it, idx) => (
+            <li key={idx}>{it.itemName} × {it.quantity}</li>
+          ))}
+        </ul>
       </div>
-      <ul className="mt-2 text-sm text-slate-300 list-disc list-inside space-y-1">
-        {order.items.map((it, idx) => (
-          <li key={idx}>{it.itemName} × {it.quantity}</li>
-        ))}
-      </ul>
-    </div>
-  );
+    );
+  };
 
   if (loading) {
     return (
