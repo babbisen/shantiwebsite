@@ -242,7 +242,7 @@ export default function OrderDetailsPage() {
     doc.text(`${T.depositPayment}: ${formatCurrency(selectedOrder.deposit)}`, 14, y);
     y += 7;
     if (depositDeadline) {
-      doc.text(`${T.deadlineForDeposit}: ${depositDeadline}`, 14, y);
+      doc.text(`${T.deadlineForDeposit}: ${formatPdfDate(depositDeadline)}`, 14, y);
       y += 7;
     }
 
@@ -263,7 +263,11 @@ export default function OrderDetailsPage() {
       doc.text(`${idx + 1}. ${T[key]}`, 16, y + idx * 6);
     });
 
-    doc.save(`order_${selectedOrder.id}.pdf`);
+    const fileName =
+      language === 'en'
+        ? `order details to ${selectedOrder.customerName}.pdf`
+        : `ordredetaljer til ${selectedOrder.customerName}.pdf`;
+    doc.save(fileName);
   };
 
   return (

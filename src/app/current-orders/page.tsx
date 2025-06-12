@@ -404,7 +404,7 @@ export default function CurrentOrdersPage() {
                 <div className="p-6">
                   {/* Customer and Date Info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <div className="lg:col-span-2 space-y-2"><label htmlFor="customerName" className={labelStyle}>Customer Name</label><input id="customerName" autoComplete="off" className={inputStyle} value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Enter name" /></div>
+                    <div className="lg:col-span-2 space-y-2"><label htmlFor="customerName" className={labelStyle}>Customer Name</label><input id="customerName" autoComplete="new-password" autoCorrect="off" spellCheck={false} className={inputStyle} value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Enter name" /></div>
                     <div className="space-y-2"><label htmlFor="deposit" className={labelStyle}>Deposit (kr)</label><input id="deposit" className={inputStyle} value={deposit} onChange={e => setDeposit(e.target.value)} type="number" min={0} placeholder="0"/></div>
                   </div>
 
@@ -414,8 +414,8 @@ export default function CurrentOrdersPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <div className="space-y-2"><label htmlFor="phone" className={labelStyle}>Phone</label><input id="phone" autoComplete="off" className={inputStyle} value={phone} onChange={e => setPhone(e.target.value)} placeholder="+47..." /></div>
-                    <div className="lg:col-span-2 space-y-2"><label htmlFor="email" className={labelStyle}>Email</label><input id="email" autoComplete="off" className={inputStyle} value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" /></div>
+                    <div className="space-y-2"><label htmlFor="phone" className={labelStyle}>Phone</label><input id="phone" autoComplete="new-password" autoCorrect="off" spellCheck={false} className={inputStyle} value={phone} onChange={e => setPhone(e.target.value)} placeholder="+47..." /></div>
+                    <div className="lg:col-span-2 space-y-2"><label htmlFor="email" className={labelStyle}>Email</label><input id="email" autoComplete="new-password" autoCorrect="off" spellCheck={false} className={inputStyle} value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" /></div>
                   </div>
                   
                   <div className="mt-4 border-t border-slate-700 pt-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
