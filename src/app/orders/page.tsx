@@ -242,7 +242,7 @@ export default function OrderDetailsPage() {
     doc.text(`${T.depositPayment}: ${formatCurrency(selectedOrder.deposit)}`, 14, y);
     y += 7;
     if (depositDeadline) {
-      doc.text(`${T.deadlineForDeposit}: ${depositDeadline}`, 14, y);
+      doc.text(`${T.deadlineForDeposit}: ${formatPdfDate(depositDeadline)}`, 14, y);
       y += 7;
     }
 

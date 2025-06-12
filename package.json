@@ -10,6 +10,7 @@
     "postinstall": "prisma generate && prisma migrate deploy"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.9.0",
     "chart.js": "^4.4.9",
     "jspdf": "^3.0.1",
