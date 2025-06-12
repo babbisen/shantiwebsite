@@ -83,12 +83,24 @@ export default function StatisticsPage() {
     if (!sortedSalesByItem || sortedSalesByItem.length === 0) {
         return { labels: [], datasets: [] };
     }
-    const topItems = sortedSalesByItem.slice(0, 7);
-    const otherSales = sortedSalesByItem.slice(7).reduce((sum, item) => sum + item.totalSales, 0);
+    const topItems = sortedSalesByItem.slice(0, 10);
+    const otherSales = sortedSalesByItem.slice(10).reduce((sum, item) => sum + item.totalSales, 0);
     const itemNames = topItems.map(item => item.itemName);
     const itemSales = topItems.map(item => item.totalSales);
     if (otherSales > 0) { itemNames.push('Other'); itemSales.push(otherSales); }
-    const backgroundColors = ['#f59e0b', '#14b8a6', '#0ea5e9', '#a78bfa', '#f472b6', '#84cc16', '#64748b'];
+    const backgroundColors = [
+      '#f59e0b',
+      '#14b8a6',
+      '#0ea5e9',
+      '#a78bfa',
+      '#f472b6',
+      '#84cc16',
+      '#64748b',
+      '#ef4444',
+      '#eab308',
+      '#8b5cf6',
+      '#374151',
+    ];
     return { labels: itemNames, datasets: [{ label: 'Sales by Item', data: itemSales, backgroundColor: backgroundColors, borderColor: '#1e293b', borderWidth: 2 }], };
   }, [sortedSalesByItem]);
 
@@ -212,7 +224,7 @@ export default function StatisticsPage() {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-6 gap-8">
           <div className="lg:col-span-3 bg-slate-800/90 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-xl p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-slate-200">Monthly Sales</h2>
@@ -231,7 +243,7 @@ export default function StatisticsPage() {
               <Line data={monthlySalesData} options={chartOptions} />
             </div>
           </div>
-          <div className="lg:col-span-2 bg-slate-800/90 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-xl p-6">
+          <div className="lg:col-span-3 bg-slate-800/90 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-xl p-6">
             <h2 className="text-xl font-semibold text-slate-200 text-center mb-4">Sales Distribution</h2>
             <div className="h-80 flex justify-center items-center">
               <Pie data={pieChartData} options={{...chartOptions, plugins: { legend: { position: 'right' as const, display: true, labels: { color: '#e2e8f0' } }}}}/>

@@ -251,9 +251,14 @@ export default function DashboardPage() {
           {upcomingPickups.length > 0 && (
             <div>
               {showReadyReminder && nextPickup && (
-                <div className="mb-4 p-4 bg-indigo-900/60 border border-indigo-700 rounded-xl flex items-center justify-between shadow-lg">
-                  <p className="text-sm font-medium text-indigo-200">Have you remembered to ready the items for {nextPickup.customerName}?</p>
-                  <button onClick={() => dismissReminder(nextPickup.id)} className="ml-4 px-3 py-1 bg-indigo-700 rounded-md text-white font-bold">Yes</button>
+                <div className="mb-4 p-4 bg-gradient-to-r from-indigo-700 via-purple-700 to-fuchsia-700 border border-indigo-700 rounded-xl flex items-center justify-between shadow-lg">
+                  <p className="text-lg font-bold text-white">Have you remembered to ready the items for {nextPickup.customerName}?</p>
+                  <button
+                    onClick={() => dismissReminder(nextPickup.id)}
+                    className="ml-4 px-3 py-1 bg-indigo-600 rounded-md text-white font-bold"
+                  >
+                    Yes
+                  </button>
                 </div>
               )}
               <h2 className="text-2xl font-bold text-white mt-8 mb-4">Upcoming Pick-ups</h2>

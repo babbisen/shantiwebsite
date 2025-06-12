@@ -510,9 +510,29 @@ export default function CurrentOrdersPage() {
                               </table>
                             </div>
                             <div className="flex items-center gap-2 pt-4 border-t border-slate-700">
-                              <button onClick={() => handleEditOrder(order)} disabled={!!processingOrderId} className="px-4 py-2 text-base font-bold text-indigo-300 bg-indigo-900/50 hover:bg-indigo-900/80 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">Edit</button>
-                              <button onClick={() => handleDeleteOrder(order.id)} disabled={!!processingOrderId} className="px-4 py-2 text-base font-bold text-red-300 bg-red-900/50 hover:bg-red-900/80 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">Delete</button>
-                              <div className="ml-auto">{processingOrderId === order.id ? (<div className="px-4 py-2 flex items-center gap-2 text-base font-bold text-white"><div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin"></div>Processing...</div>) : (<button onClick={() => handleCompleteOrder(order.id)} disabled={!!processingOrderId} className="px-4 py-2 text-base font-bold text-white bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">Mark as Completed</button>)}</div>
+                              <button
+                                onClick={() => handleDeleteOrder(order.id)}
+                                disabled={!!processingOrderId}
+                                className="px-4 py-2 text-base font-bold text-red-300 bg-red-900/50 hover:bg-red-900/80 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                Delete
+                              </button>
+                              <div className="ml-auto">
+                                {processingOrderId === order.id ? (
+                                  <div className="px-4 py-2 flex items-center gap-2 text-base font-bold text-white">
+                                    <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin"></div>
+                                    Processing...
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => handleCompleteOrder(order.id)}
+                                    disabled={!!processingOrderId}
+                                    className="px-4 py-2 text-base font-bold text-white bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
+                                    Mark as Completed
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </div>
                         )
