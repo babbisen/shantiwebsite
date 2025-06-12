@@ -1,5 +1,6 @@
 'use client';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { toast } from 'sonner';
 import { CurrencyDollarIcon, TruckIcon, CalendarDaysIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { formatDate } from '@/lib/date';
 import { getPickupDateStyles } from '@/lib/pickupColors';
@@ -59,36 +60,38 @@ export default function DashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [dismissedReminders, setDismissedReminders] = useState<number[]>([]);
+  const [processingOrderId, setProcessingOrderId] = useState<number | null>(null);
+
+  const fetchOrders = useCallback(async () => {
+    try {
+      const res = await fetch('/api/orders');
+      const data: OrderFromServer[] = await res.json();
+      const contactData = loadContactInfo();
+      const mapped: Order[] = data.map(o => ({
+        id: o.id,
+        customerName: o.customerName,
+        pickUpDate: o.pickUpDate.slice(0, 10),
+        deliveryDate: o.deliveryDate.slice(0, 10),
+        finalPrice: o.finalPrice ?? undefined,
+        items: o.items.map(i => ({
+          itemName: i.itemName || i.inventoryItem?.name || 'Deleted Item',
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+          total: i.total,
+        })),
+        fees: o.fees || [],
+        phone: contactData[o.id]?.phone || '',
+        email: contactData[o.id]?.email || '',
+      }));
+      setOrders(mapped);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch('/api/orders');
-        const data: OrderFromServer[] = await res.json();
-        const contactData = loadContactInfo();
-        const mapped: Order[] = data.map(o => ({
-          id: o.id,
-          customerName: o.customerName,
-          pickUpDate: o.pickUpDate.slice(0, 10),
-          deliveryDate: o.deliveryDate.slice(0, 10),
-          finalPrice: o.finalPrice ?? undefined,
-          items: o.items.map(i => ({
-            itemName: i.itemName || i.inventoryItem?.name || 'Deleted Item',
-            quantity: i.quantity,
-            unitPrice: i.unitPrice,
-            total: i.total,
-          })),
-          fees: o.fees || [],
-          phone: contactData[o.id]?.phone || '',
-          email: contactData[o.id]?.email || '',
-        }));
-        setOrders(mapped);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
+    fetchOrders();
+  }, [fetchOrders]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -140,7 +143,7 @@ export default function DashboardPage() {
       orders.filter(o => {
         const start = new Date(o.pickUpDate + 'T00:00:00');
         const end = new Date(o.deliveryDate + 'T00:00:00');
-        return start <= today && end >= today && end <= inFive;
+        return start < today && end >= today && end <= inFive;
       }),
     [orders, today, inFive]
   );
@@ -171,10 +174,31 @@ export default function DashboardPage() {
     }
   };
 
+  const handleCompleteOrder = useCallback(
+    async (orderId: number) => {
+      setProcessingOrderId(orderId);
+      try {
+        const res = await fetch(`/api/orders/${orderId}/complete`, {
+          method: 'PATCH',
+        });
+        if (res.ok) {
+          toast.success('Order marked as complete.');
+          await fetchOrders();
+        } else {
+          toast.error('Failed to complete order');
+        }
+      } finally {
+        setProcessingOrderId(null);
+      }
+    },
+    [fetchOrders]
+  );
+
   const renderOrder = (
     order: Order,
     colorize: boolean = true,
-    highlightToday: boolean = false
+    highlightToday: boolean = false,
+    showCompleteButton: boolean = false
   ) => {
     const pickupStyles = getPickupDateStyles(order.pickUpDate);
     const itemsTotal = order.items.reduce((a, b) => a + b.total, 0);
@@ -209,6 +233,24 @@ export default function DashboardPage() {
             <li key={idx}>{it.itemName} × {it.quantity}</li>
           ))}
         </ul>
+        {showCompleteButton && (
+          <div className="mt-3 flex justify-end">
+            {processingOrderId === order.id ? (
+              <div className="px-4 py-2 flex items-center gap-2 text-sm font-bold text-white">
+                <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin"></div>
+                Processing...
+              </div>
+            ) : (
+              <button
+                onClick={() => handleCompleteOrder(order.id)}
+                disabled={!!processingOrderId}
+                className="px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Mark as Completed
+              </button>
+            )}
+          </div>
+        )}
       </div>
     );
   };
@@ -290,7 +332,8 @@ export default function DashboardPage() {
                     o,
                     false,
                     new Date(o.deliveryDate + 'T00:00:00').getTime() ===
-                      today.getTime()
+                      today.getTime(),
+                    true
                   )
                 )}
               </div>
