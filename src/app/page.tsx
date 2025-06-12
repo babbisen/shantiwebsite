@@ -222,7 +222,16 @@ export default function Home() {
                     </td>
                     <td className="px-6 py-4 text-right text-slate-300 font-medium">{formatCurrency(item.pricePerItem)}</td>
                     <td className="px-6 py-4 text-right text-slate-300 font-medium">{formatCurrency(item.pricePaid)}</td>
-                    <td className="px-6 py-4"><div className="flex justify-center gap-2"><button onClick={() => handleEdit(item)} className="px-4 py-2 text-sm font-bold text-indigo-300 bg-indigo-900/50 hover:bg-indigo-900/80 rounded-lg transition-all shadow-sm">Edit</button><button onClick={() => handleDelete(item.id)} className="px-4 py-2 text-sm font-bold text-red-300 bg-red-900/50 hover:bg-red-900/80 rounded-lg transition-all shadow-sm">Delete</button></div></td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="px-4 py-2 text-sm font-bold text-red-300 bg-red-900/50 hover:bg-red-900/80 rounded-lg transition-all shadow-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
