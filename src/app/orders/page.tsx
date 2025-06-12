@@ -263,7 +263,11 @@ export default function OrderDetailsPage() {
       doc.text(`${idx + 1}. ${T[key]}`, 16, y + idx * 6);
     });
 
-    doc.save(`order_${selectedOrder.id}.pdf`);
+    const fileName =
+      language === 'en'
+        ? `order details to ${selectedOrder.customerName}.pdf`
+        : `ordredetaljer til ${selectedOrder.customerName}.pdf`;
+    doc.save(fileName);
   };
 
   return (

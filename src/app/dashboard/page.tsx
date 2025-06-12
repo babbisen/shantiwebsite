@@ -84,8 +84,9 @@ export default function DashboardPage() {
   const upcomingDeliveries = useMemo(
     () =>
       orders.filter(o => {
+        const start = new Date(o.pickUpDate + 'T00:00:00');
         const end = new Date(o.deliveryDate + 'T00:00:00');
-        return end >= today && end <= inFive;
+        return start <= today && end >= today && end <= inFive;
       }),
     [orders, today, inFive]
   );
