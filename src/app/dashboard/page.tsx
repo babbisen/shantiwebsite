@@ -58,6 +58,7 @@ const formatCurrency = (amount: number | null | undefined) => {
 export default function DashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dismissedReminders, setDismissedReminders] = useState<number[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -89,6 +90,16 @@ export default function DashboardPage() {
     load();
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = JSON.parse(localStorage.getItem('readyDismissed') || '[]');
+      setDismissedReminders(Array.isArray(stored) ? stored : []);
+    } catch {
+      setDismissedReminders([]);
+    }
+  }, []);
+
   const today = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -113,10 +124,14 @@ export default function DashboardPage() {
 
   const upcomingPickups = useMemo(
     () =>
-      orders.filter(o => {
-        const start = new Date(o.pickUpDate + 'T00:00:00');
-        return start > today && start <= inFive;
-      }),
+      orders
+        .filter(o => {
+          const start = new Date(o.pickUpDate + 'T00:00:00');
+          return start > today && start <= inFive;
+        })
+        .sort((a, b) =>
+          new Date(a.pickUpDate).getTime() - new Date(b.pickUpDate).getTime()
+        ),
     [orders, today, inFive]
   );
 
@@ -139,7 +154,24 @@ export default function DashboardPage() {
     }, 0);
   }, [upcomingPickups]);
 
-  const renderOrder = (order: Order) => {
+  const nextPickup = upcomingPickups[0];
+  const showReadyReminder = useMemo(() => {
+    if (!nextPickup) return false;
+    const diffMs =
+      new Date(nextPickup.pickUpDate + 'T00:00:00').getTime() - today.getTime();
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    return days <= 1 && !dismissedReminders.includes(nextPickup.id);
+  }, [nextPickup, today, dismissedReminders]);
+
+  const dismissReminder = (id: number) => {
+    const updated = [...dismissedReminders, id];
+    setDismissedReminders(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('readyDismissed', JSON.stringify(updated));
+    }
+  };
+
+  const renderOrder = (order: Order, colorize: boolean = true) => {
     const pickupStyles = getPickupDateStyles(order.pickUpDate);
     const itemsTotal = order.items.reduce((a, b) => a + b.total, 0);
     const feesTotal = order.fees.reduce((a, b) => a + b.amount, 0);
@@ -151,7 +183,7 @@ export default function DashboardPage() {
           <div>
             <h3 className="text-lg font-bold text-white">{order.customerName}</h3>
             <div className="flex items-center gap-2 text-sm font-bold mt-1">
-              <span className={`px-2 py-0.5 rounded-md ${pickupStyles.bg} ${pickupStyles.text}`}>{formatDate(order.pickUpDate)}</span>
+              <span className={`px-2 py-0.5 rounded-md ${colorize ? pickupStyles.bg : ''} ${colorize ? pickupStyles.text : ''}`}>{formatDate(order.pickUpDate)}</span>
               <span className="text-slate-500">→</span>
               <span className="text-slate-400">{formatDate(order.deliveryDate)}</span>
             </div>
@@ -203,14 +235,14 @@ export default function DashboardPage() {
             <div className="flex items-center"><div className="p-3 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-600 shadow-lg"><ArrowDownTrayIcon className="w-6 h-6 text-white" /></div><div className="ml-4"><p className="text-sm font-medium text-slate-400">Deliveries Next 5 Days</p><p className="text-2xl font-bold text-white">{upcomingDeliveries.length}</p></div></div>
           </div>
           <div className="bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 shadow-lg">
-            <div className="flex items-center"><div className="p-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 shadow-lg"><CurrencyDollarIcon className="w-6 h-6 text-white" /></div><div className="ml-4"><p className="text-sm font-medium text-slate-400">Expected Revenue</p><p className="text-2xl font-bold text-white">{formatCurrency(upcomingRevenue)}</p></div></div>
+            <div className="flex items-center"><div className="p-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 shadow-lg"><CurrencyDollarIcon className="w-6 h-6 text-white" /></div><div className="ml-4"><p className="text-sm font-medium text-slate-400">Expected Revenue next 5 days</p><p className="text-2xl font-bold text-white">{formatCurrency(upcomingRevenue)}</p></div></div>
           </div>
         </div>
         {currentlyOut.length > 0 && (
           <div>
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">Orders Currently Out</h2>
             <div className="space-y-4">
-              {currentlyOut.map(renderOrder)}
+              {currentlyOut.map(o => renderOrder(o))}
             </div>
           </div>
         )}
@@ -218,9 +250,15 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {upcomingPickups.length > 0 && (
             <div>
+              {showReadyReminder && nextPickup && (
+                <div className="mb-4 p-4 bg-indigo-900/60 border border-indigo-700 rounded-xl flex items-center justify-between shadow-lg">
+                  <p className="text-sm font-medium text-indigo-200">Have you remembered to ready the items for {nextPickup.customerName}?</p>
+                  <button onClick={() => dismissReminder(nextPickup.id)} className="ml-4 px-3 py-1 bg-indigo-700 rounded-md text-white font-bold">Yes</button>
+                </div>
+              )}
               <h2 className="text-2xl font-bold text-white mt-8 mb-4">Upcoming Pick-ups</h2>
               <div className="space-y-4">
-                {upcomingPickups.map(renderOrder)}
+                {upcomingPickups.map(o => renderOrder(o))}
               </div>
             </div>
           )}
@@ -228,7 +266,7 @@ export default function DashboardPage() {
             <div>
               <h2 className="text-2xl font-bold text-white mt-8 mb-4">Upcoming Deliveries</h2>
               <div className="space-y-4">
-                {upcomingDeliveries.map(renderOrder)}
+                {upcomingDeliveries.map(o => renderOrder(o, false))}
               </div>
             </div>
           )}

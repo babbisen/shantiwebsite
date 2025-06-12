@@ -20,7 +20,7 @@ export const getPickupDateStyles = (
 
   // Today or tomorrow
   if (daysUntilPickup <= 1) {
-    return { bg: 'bg-red-600', text: 'text-white' };
+    return { bg: 'bg-red-800', text: 'text-white' };
   }
 
   // 2-4 days away
