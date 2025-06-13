@@ -93,7 +93,6 @@ export default function CurrentOrdersPage() {
   const [specialPriceCustomer, setSpecialPriceCustomer] = useState('');
   const [specialPriceItem, setSpecialPriceItem] = useState('');
   const [specialPriceValue, setSpecialPriceValue] = useState('');
-  const [language, setLanguage] = useState<'en' | 'no'>('en');
   const [availabilityInfo, setAvailabilityInfo] = useState<AvailabilityInfo>({ available: 0, message: '', status: 'idle' });
   const [processingOrderId, setProcessingOrderId] = useState<number | null | string>(null);
   const [isSpecialPriceLoading, setIsSpecialPriceLoading] = useState(false);
