@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { useLanguage } from '@/components/LanguageContext';
 import { formatDate } from '@/lib/date';
 import { getPickupDateStyles } from '@/lib/pickupColors';
 import { toast } from 'sonner';
@@ -68,7 +69,13 @@ const StockStatus = ({ info }: { info: AvailabilityInfo }) => {
   }
 };
 
+const titleTranslations = {
+  en: 'Order Management',
+  eve: 'Ðoɖo si dzi woato akpɔ egbɔ',
+};
+
 export default function CurrentOrdersPage() {
+  const { language } = useLanguage();
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [orders, setOrders] = useState<OrderState[]>([]);
   const [specialPrices, setSpecialPrices] = useState<SpecialPrice[]>([]);
@@ -369,15 +376,12 @@ export default function CurrentOrdersPage() {
 
   return (
     <>
-      <div className="fixed top-1/2 -translate-y-1/2 right-6 z-50 flex flex-col gap-2 bg-slate-800/80 backdrop-blur-sm rounded-lg p-1 shadow-2xl border border-slate-700/50">
-        <button onClick={() => setLanguage('en')} className={`px-4 py-2 text-sm font-bold rounded-md transition-all duration-200 ${language === 'en' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}>EN</button>
-        <button onClick={() => setLanguage('no')} className={`px-4 py-2 text-sm font-bold rounded-md transition-all duration-200 ${language === 'no' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}>NO</button>
-      </div>
+
       
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-slate-200">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Order Management</h1>
+          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">{titleTranslations[language]}</h1>
             <div className="w-24 h-1 bg-gradient-to-r from-indigo-400 to-purple-400 mx-auto rounded-full"></div>
           </div>
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">

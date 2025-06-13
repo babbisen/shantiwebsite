@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '@/components/LanguageContext';
 import { toast } from 'sonner';
 
 type Item = {
@@ -24,7 +25,13 @@ const formatCurrency = (amount: number | null | undefined) => {
   return `${formattedAmount} kr`;
 };
 
+const titleTranslations = {
+  en: 'Inventory Management',
+  eve: 'Nuŋɔŋlɔdzesiwo Ŋuti Gomenɔamesi Ŋuti Gomen',
+};
+
 export default function Home() {
+  const { language } = useLanguage();
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({ name: '', totalQuantity: '', pricePerItem: '', pricePaid: '' });
@@ -159,7 +166,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-slate-200">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Inventory Management</h1>
+          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">{titleTranslations[language]}</h1>
           <div className="w-24 h-1 bg-gradient-to-r from-indigo-400 to-purple-400 mx-auto rounded-full"></div>
         </div>
         

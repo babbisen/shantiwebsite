@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
+import { useLanguage } from '@/components/LanguageContext';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/date';
 
@@ -42,7 +43,7 @@ const loadContactInfo = (): Record<number, { phone: string; email: string }> => 
   } catch {
     return {};
   }
-};
+}; 
 
 // --- HELPER FUNCTION for Currency ---
 const formatCurrency = (amount: number | null | undefined) => {
@@ -56,7 +57,13 @@ const formatCurrency = (amount: number | null | undefined) => {
   return `${formattedAmount} kr`;
 };
 
+const titleTranslations = {
+  en: 'Completed Order Archive',
+  eve: 'Agbalẽ siwo katã woŋlɔ ɖe agbalẽa me',
+};
+
 export default function CompletedOrdersPage() {
+  const { language } = useLanguage();
   const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingOrderId, setProcessingOrderId] = useState<number | null>(null);
@@ -139,7 +146,7 @@ export default function CompletedOrdersPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">
-            Completed Order Archive
+            {titleTranslations[language]}
           </h1>
           <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-blue-500 mx-auto rounded-full mb-6"></div>
           <input

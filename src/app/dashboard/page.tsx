@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useLanguage } from '@/components/LanguageContext';
 import { toast } from 'sonner';
 import { CurrencyDollarIcon, TruckIcon, CalendarDaysIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { formatDate } from '@/lib/date';
@@ -17,6 +18,11 @@ interface OrderFee {
   description: string;
   amount: number;
 }
+
+const titleTranslations = {
+  en: 'Dashboard',
+  eve: 'Ekpeye - Dashboard',
+};
 
 interface OrderFromServer {
   id: number;
@@ -57,6 +63,7 @@ const formatCurrency = (amount: number | null | undefined) => {
 };
 
 export default function DashboardPage() {
+  const { language } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [dismissedReminders, setDismissedReminders] = useState<number[]>([]);
@@ -270,7 +277,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-slate-200">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">Dashboard</h1>
+          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">{titleTranslations[language]}</h1>
           <div className="w-24 h-1 bg-gradient-to-r from-indigo-400 to-purple-400 mx-auto rounded-full"></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

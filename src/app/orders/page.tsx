@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLanguage } from '@/components/LanguageContext';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -67,30 +68,30 @@ const translations = {
     orderItems: 'Order Summary',
     finalPriceLabel: 'Final Agreed Price',
   },
-  no: {
-    generateDetails: 'Generer Ordredetaljer',
-    selectAnOrder: 'Velg en Ordre',
-    searchPlaceholder: 'Søk etter kundenavn...',
-    orderDetailsFor: 'Ordredetaljer for',
-    pickUpDate: 'Hentedato',
-    deliveryDate: 'Leveringsdato',
-    itemName: 'Artikkel',
-    pricePerItem: 'Pris per enhet',
-    quantity: 'Antall',
-    totalPriceForItem: 'Totalpris for vare',
-    depositPayment: 'Depositum',
-    deadlineForDeposit: 'Frist for depositum',
-    totalPriceForOrder: 'Totalpris for ordre',
-    includingDeposit: 'Inkludert depositum',
-    additionalComments: 'Tilleggskommentarer',
-    comment1: 'For å bekrefte bestillingen og sikre at du mottar varene i tide, må depositumet betales innen den avtalte fristen.',
-    comment2: 'Depositumet vil bli returnert så snart bestillingen er levert tilbake uten skader eller manglende deler.',
-    comment3: 'Depositumet kan sendes via Vipps til 99484576.',
-    comment4: 'Varene må returneres i samme stand som de var da de ble hentet.',
-    loading: 'Laster inn ordrer...',
-    selectOrderPrompt: 'Vennligst velg en ordre ovenfor for å se detaljene.',
-    orderItems: 'Ordreoversikt',
-    finalPriceLabel: 'Endelig avtalt pris',
+  eve: {
+    generateDetails: 'Ɖoe Ɖe Amewo Ɖoe Ɖe Amewo',
+    selectAnOrder: 'Tianyi Seo',
+    searchPlaceholder: 'Kpɔe ɖa le asiƒlela ƒe ŋkɔ me...',
+    orderDetailsFor: 'Na numeɖeɖe bubuwo',
+    pickUpDate: 'Ŋkeke si dzi woƒo ƒu ɖo',
+    deliveryDate: 'Ŋkeke si dzi woanae',
+    itemName: 'Item Nyawo',
+    pricePerItem: 'Gawo le nu sia nu me',
+    quantity: 'الكمية',
+    totalPriceForItem: 'Nu si ŋu woƒo nu tsoe le nyati sia me',
+    depositPayment: 'Deposit Paye ta vie',
+    deadlineForDeposit: 'Gaɖoɖotaƒe',
+    totalPriceForOrder: 'Wholesale menu for order',
+    includingDeposit: 'Gaxeɖetaɖodzinuwo',
+    additionalComments: 'Ɖoe Ɖe Amewo Ɖoe Ɖe Amewo',
+    comment1: 'Be nàɖo kpe edzi be èxɔ nu siwo nèbia la le ɣeyiɣi nyuitɔ dzi la, ele be nàxe fe si nèɖo la ɖe ɣeyiɣi si nèɖo la dzi.',
+    comment2: 'Ne ame aɖe tsɔ ga si wòxɔ la na ame aɖe la, ele be wòatsɔ ga si wòxɔ la ana ame aɖe.',
+    comment3: 'Woate ŋu aɖo ga si nètsɔ le Vipps dzi la ɖe 99484576.',
+    comment4: 'Ele be woagbugbɔ nu siawo aɖo nɔnɔme si me wonɔ esime woƒo wo nu ƒu la me.',
+    loading: 'Loading Sewo...',
+    selectOrderPrompt: 'Míeɖe kuku, tia se si le afisia be nàkpɔ eƒe numeɖeɖewo.',
+    orderItems: 'Ŋgɔdonya',
+    finalPriceLabel: 'Nu si ŋu woƒo nu tsoe le lododoa me',
   }
 };
 
@@ -124,7 +125,7 @@ export default function OrderDetailsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const [language, setLanguage] = useState<'en' | 'no'>('en');
+  const { language, setLanguage } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -271,17 +272,12 @@ export default function OrderDetailsPage() {
     const fileName =
       language === 'en'
         ? `order details to ${selectedOrder.customerName}.pdf`
-        : `ordredetaljer til ${selectedOrder.customerName}.pdf`;
+        : `order details to ${selectedOrder.customerName} (eve).pdf`;
     doc.save(fileName);
   };
 
   return (
     <main className="min-h-screen bg-slate-900 text-slate-300 font-sans p-4 sm:p-6 lg:p-8">
-      {/* --- CHANGE: Repositioned and restyled language toggle --- */}
-      <div className="fixed top-1/2 -translate-y-1/2 right-6 z-50 flex flex-col gap-2 bg-slate-800/80 backdrop-blur-sm rounded-lg p-1 shadow-2xl border border-slate-700/50">
-        <button onClick={() => setLanguage('en')} className={`px-4 py-2 text-sm font-bold rounded-md transition-all duration-200 ${language === 'en' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}>EN</button>
-        <button onClick={() => setLanguage('no')} className={`px-4 py-2 text-sm font-bold rounded-md transition-all duration-200 ${language === 'no' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}>NO</button>
-      </div>
       
       <div className="relative max-w-3xl mx-auto">
         {selectedOrder && (

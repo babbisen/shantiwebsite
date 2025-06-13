@@ -1,10 +1,13 @@
 // src/app/layout.tsx
 
+'use client';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/navbar';
-import { Toaster } from 'sonner'; // --- CHANGE: Import the Toaster component ---
+import { Toaster } from 'sonner';
+import { LanguageProvider } from '@/components/LanguageContext';
+import LanguageToggle from '@/components/LanguageToggle';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,10 +24,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Navbar />
-        <main>{children}</main>
-        {/* --- CHANGE: Add the Toaster component here --- */}
-        <Toaster richColors theme="dark" />
+        <LanguageProvider>
+          <Navbar />
+          <LanguageToggle />
+          <main>{children}</main>
+          <Toaster richColors theme="dark" />
+        </LanguageProvider>
       </body>
     </html>
   );

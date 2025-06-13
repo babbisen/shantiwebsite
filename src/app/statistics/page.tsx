@@ -1,10 +1,16 @@
 // src/app/statistics/page.tsx
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLanguage } from '@/components/LanguageContext';
 import { Line, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, BarElement } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, BarElement);
+
+const titleTranslations = {
+  en: 'Statistics Dashboard',
+  eve: 'Dashboard ƒe akɔntabubu',
+};
 
 // --- Types ---
 type KpiData = { totalLifetimeSales: number; totalSalesThisMonth: number; totalSalesThisYear: number; averageOrderValue: number; };
@@ -36,6 +42,7 @@ function KpiCard({ title, value, icon, gradient, isCurrency = true }: { title: s
 }
 
 export default function StatisticsPage() {
+  const { language } = useLanguage();
   const [stats, setStats] = useState<StatisticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
@@ -122,7 +129,7 @@ export default function StatisticsPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-stone-900">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-200 to-amber-400 bg-clip-text text-transparent mb-4">Statistics Dashboard</h1>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-200 to-amber-400 bg-clip-text text-transparent mb-4">{titleTranslations[language]}</h1>
           </div>
           <div className="bg-slate-800/90 backdrop-blur-sm rounded-2xl p-12 text-center border border-slate-700/50 shadow-xl">
             <p className="text-2xl font-semibold text-slate-200">No Statistics Available</p>
@@ -149,7 +156,7 @@ export default function StatisticsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-stone-900">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-200 to-amber-400 bg-clip-text text-transparent mb-4">Statistics Dashboard</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-200 to-amber-400 bg-clip-text text-transparent mb-4">{titleTranslations[language]}</h1>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">

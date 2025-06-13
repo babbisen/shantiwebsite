@@ -4,20 +4,43 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useLanguage } from './LanguageContext';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { language } = useLanguage();
+
+  const labels = {
+    en: {
+      dashboard: 'Dashboard',
+      inventory: 'Inventory',
+      current: 'Current Orders',
+      packages: 'Packages',
+      details: 'Order Details',
+      completed: 'Completed Orders',
+      statistics: 'Statistics',
+    },
+    eve: {
+      dashboard: 'Ekpeye - Dashboard',
+      inventory: 'Ŋgɔdonya',
+      current: 'Seɖoƒe meli na esia o',
+      packages: 'Eye Packages',
+      details: 'Ŋlɔ nu siwo katã le eme la ɖi',
+      completed: 'Dɔdeasiwo wu enu',
+      statistics: 'Eye Statistics',
+    },
+  };
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard' },
-    { href: '/', label: 'Inventory' },
-    { href: '/current-orders', label: 'Current Orders' },
-    { href: '/packages', label: 'Packages' },
-    { href: '/orders', label: 'Order Details' },
-    { href: '/completed-orders', label: 'Completed Orders' },
-    { href: '/statistics', label: 'Statistics' },
+    { href: '/dashboard', label: labels[language].dashboard },
+    { href: '/', label: labels[language].inventory },
+    { href: '/current-orders', label: labels[language].current },
+    { href: '/packages', label: labels[language].packages },
+    { href: '/orders', label: labels[language].details },
+    { href: '/completed-orders', label: labels[language].completed },
+    { href: '/statistics', label: labels[language].statistics },
   ];
 
   return (
